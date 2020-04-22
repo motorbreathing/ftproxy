@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 
 public class LineProvider
 {
-    private static final String UTF8_STR = "UTF=8";
+    private static final String UTF8_STR = "UTF-8";
     private static final Charset charset = Charset.forName(UTF8_STR);
     private static final char LF = '\n';
     private static final char CR = '\r';
