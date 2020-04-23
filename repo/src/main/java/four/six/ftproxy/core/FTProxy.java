@@ -4,10 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.nio.NioEventLoopGroup;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -16,9 +13,11 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
+import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.LineHandler;
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.StringEncoder;
+import four.six.ftproxy.netty.ClientChannelInitializer;
 
 public class FTProxy {
 
@@ -31,37 +30,22 @@ public class FTProxy {
         new FTProxy().run();
     }
 
-    private void setupChannelInitializer(ServerBootstrap b)
+    private void runServer() throws InterruptedException
     {
-        ChannelInitializer<SocketChannel> myChan =
-        new ChannelInitializer<SocketChannel>() {
-            @Override
-            public void initChannel(SocketChannel ch) throws Exception
-            {
-                ch.pipeline().addLast(new StringDecoder(),
-                                      new StringEncoder(),
-                                      new LineHandler());
-            }
-        };
+        NettyUtil.getServerBootstrap()
+        .childHandler(new ClientChannelInitializer())
+        .option(ChannelOption.SO_BACKLOG, SERVER_BACKLOG)
+        .childOption(ChannelOption.SO_KEEPALIVE, true)
+        .bind(PORT).sync()
+        .channel().closeFuture().sync();
 
-        b.childHandler(myChan);
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup);
-            b.channel(NioServerSocketChannel.class);
-            setupChannelInitializer(b);
-            b.option(ChannelOption.SO_BACKLOG, SERVER_BACKLOG);
-            b.childOption(ChannelOption.SO_KEEPALIVE, true);
-            b.bind(PORT).sync()
-             .channel().closeFuture().sync();
+            runServer();
         } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            NettyUtil.shutdown();
         }
     }
 }
