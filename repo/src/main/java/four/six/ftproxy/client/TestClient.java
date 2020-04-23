@@ -16,11 +16,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import four.six.ftproxy.netty.ClientHandler;
+import four.six.ftproxy.netty.TestClientHandler;
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.StringEncoder;
 
-public class FTProxyClient {
+public class TestClient {
     static final String DEFAULT_HOST_STR = "127.0.0.1";
     static final String DEFAULT_PORT_STR = "8080";
     static final String HOST = System.getProperty("host", DEFAULT_HOST_STR);
@@ -35,7 +35,7 @@ public class FTProxyClient {
                   throws Exception {
                     ch.pipeline().addLast(new StringDecoder(),
                                           new StringEncoder(),
-                                          new ClientHandler());
+                                          new TestClientHandler());
                 }
             };
         b.handler(myChan);
@@ -43,7 +43,7 @@ public class FTProxyClient {
 
     public static void main(String[] args) throws Exception
     {
-        new FTProxyClient().connect();
+        new TestClient().connect();
     }
 
     public void doWork(Channel ch) throws Exception
