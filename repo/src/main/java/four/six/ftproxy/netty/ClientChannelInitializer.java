@@ -1,5 +1,7 @@
 package four.six.ftproxy.netty;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,6 +21,13 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
         ch.pipeline().addLast(DECODER,
                               ENCODER,
                               new LineHandler());
+        ChannelFuture closeFuture = ch.closeFuture();
+        closeFuture.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                System.out.println("channel close!");
+            }
+        });
     }
 
     @Override

@@ -4,6 +4,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import io.netty.bootstrap.Bootstrap;
@@ -33,7 +34,7 @@ public class NettyUtil
     {
         return new Bootstrap()
                    .group(workerGroup)
-                   .channel(NioServerSocketChannel.class);
+                   .channel(NioSocketChannel.class);
     }
 
     public ChannelFuture getChannelToRemoteHost() throws Exception
