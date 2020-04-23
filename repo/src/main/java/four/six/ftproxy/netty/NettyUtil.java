@@ -2,8 +2,14 @@ package four.six.ftproxy.netty;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+
+import four.six.ftproxy.util.Util;
 
 public class NettyUtil 
 {
@@ -21,5 +27,19 @@ public class NettyUtil
         return new ServerBootstrap()
                    .group(bossGroup, workerGroup)
                    .channel(NioServerSocketChannel.class);
+    }
+
+    public static Bootstrap getClientBootstrap()
+    {
+        return new Bootstrap()
+                   .group(workerGroup)
+                   .channel(NioServerSocketChannel.class);
+    }
+
+    public ChannelFuture getChannelToRemoteHost() throws Exception
+    {
+         Bootstrap b = NettyUtil.getClientBootstrap();
+         b.option(ChannelOption.SO_KEEPALIVE, true);
+         return b.connect(Util.REMOTE_HOST, Util.REMOTE_PORT);
     }
 }

@@ -10,17 +10,22 @@ import four.six.ftproxy.netty.LineHandler;
 
 public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
 {
+    private static final StringDecoder DECODER = new StringDecoder();
+    private static final StringEncoder ENCODER = new StringEncoder();
+
     @Override
     public void initChannel(SocketChannel ch) throws Exception
     {
-        ch.pipeline().addLast(new StringDecoder(),
-                              new StringEncoder(),
+        ch.pipeline().addLast(DECODER,
+                              ENCODER,
                               new LineHandler());
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
+    public void exceptionCaught(ChannelHandlerContext ctx,
+                                Throwable cause) throws Exception
     {
-        System.out.println("Caught exception!");
+        System.out.println("ClientChannelInitializer: caught exception!");
+        ctx.close();
     }
 }

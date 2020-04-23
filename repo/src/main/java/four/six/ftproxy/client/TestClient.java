@@ -3,22 +3,17 @@ package four.six.ftproxy.client;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.channel.ChannelOption;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
-import four.six.ftproxy.netty.TestClientHandler;
-import four.six.ftproxy.netty.StringDecoder;
+import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.StringEncoder;
+import four.six.ftproxy.netty.StringDecoder;
+import four.six.ftproxy.netty.TestClientHandler;
 
 public class TestClient {
     static final String DEFAULT_HOST_STR = "127.0.0.1";
@@ -71,17 +66,14 @@ public class TestClient {
 
     public void connect() throws Exception
     {
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            Bootstrap b = new Bootstrap();
-            b.group(workerGroup);
-            b.channel(NioSocketChannel.class);
+            Bootstrap b = NettyUtil.getClientBootstrap();
             b.option(ChannelOption.SO_KEEPALIVE, true);
             setupChannelInitializer(b);
             ChannelFuture f = b.connect(HOST, PORT).sync();
             doWork(f.channel());
         } finally {
-            workerGroup.shutdownGracefully();
+            NettyUtil.shutdown();
         }
     }
 }

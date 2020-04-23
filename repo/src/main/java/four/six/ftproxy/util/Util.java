@@ -1,0 +1,22 @@
+package four.six.ftproxy.util;
+
+public class Util
+{
+    private static final String DEFAULT_HOST_STR = "127.0.0.1";
+    private static final String DEFAULT_PORT_STR = "8080";
+    private static final String DEFAULT_REMOTE_HOST_STR = "127.0.0.1";
+    private static final String DEFAULT_REMOTE_PORT_STR = "14646";
+    private static final String HOST_KEY = "host";
+    private static final String PORT_KEY = "port";
+    private static final String REMOTE_HOST_KEY = "remote-host";
+    private static final String REMOTE_PORT_KEY = "remote-port";
+
+    public static final String HOST =
+        System.getProperty(HOST_KEY, DEFAULT_HOST_STR);
+    public static final int PORT =
+        Integer.parseInt(System.getProperty(PORT_KEY, DEFAULT_PORT_STR));
+    public static final String REMOTE_HOST =
+        System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
+    public static final int REMOTE_PORT =
+        Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
+}
