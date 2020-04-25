@@ -21,13 +21,6 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
         ch.pipeline().addLast(DECODER,
                               ENCODER,
                               new LineHandler());
-        ChannelFuture closeFuture = ch.closeFuture();
-        closeFuture.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                System.out.println("channel close!");
-            }
-        });
     }
 
     @Override
@@ -35,6 +28,7 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
                                 Throwable cause) throws Exception
     {
         System.out.println("ClientChannelInitializer: caught exception!");
+        cause.printStackTrace();
         ctx.close();
     }
 }

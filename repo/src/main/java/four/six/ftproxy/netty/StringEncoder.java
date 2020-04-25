@@ -12,6 +12,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
+@Sharable
 public class StringEncoder extends MessageToMessageEncoder<CharSequence> {
 
     private final Charset charset;
@@ -38,5 +39,11 @@ public class StringEncoder extends MessageToMessageEncoder<CharSequence> {
         }
 
         out.add(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(msg), charset));
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx)
+    {
+        System.out.println("StringEncoder: removed");
     }
 }
