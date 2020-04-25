@@ -21,7 +21,7 @@ public class FTProxy
         .childHandler(new ClientChannelInitializer())
         .option(ChannelOption.SO_BACKLOG, SERVER_BACKLOG)
         .childOption(ChannelOption.SO_KEEPALIVE, true)
-        .bind(Util.PORT).sync()
+        .bind(Util.THIS_PORT).sync()
         .channel().closeFuture().sync();
 
     }

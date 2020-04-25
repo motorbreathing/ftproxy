@@ -40,20 +40,26 @@ public class NettyUtil
                    .channel(NioSocketChannel.class);
     }
 
-    public ChannelFuture getChannelToRemoteHost() throws Exception
+    public static ChannelFuture
+        getChannelToRemoteHost(ChannelInitializer<? extends Channel> ci) throws Exception
     {
-         Bootstrap b = getClientBootstrap();
-         b.option(ChannelOption.SO_KEEPALIVE, true);
-         return b.connect(Util.REMOTE_HOST, Util.REMOTE_PORT);
+        return getChannelToHost(Util.REMOTE_HOST, Util.REMOTE_PORT, ci);
     }
 
     public static ChannelFuture
         getChannelToProxy(ChannelInitializer<? extends Channel> ci) throws Exception
     {
+        return getChannelToHost(Util.THIS_HOST, Util.THIS_PORT, ci);
+    }
+
+    public static ChannelFuture
+        getChannelToHost(String host, int port,
+                         ChannelInitializer<? extends Channel> ci) throws Exception
+    {
         Bootstrap b = getClientBootstrap();
         b.option(ChannelOption.SO_KEEPALIVE, true);
         if (ci != null)
             b.handler(ci);
-        return b.connect(Util.HOST, Util.PORT);
+        return b.connect(host, port);
     }
 }
