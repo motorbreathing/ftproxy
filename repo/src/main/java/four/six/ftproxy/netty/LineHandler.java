@@ -75,6 +75,8 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
         System.out.println("LineHandler: removed");
+        if (other != null)
+            other.close();
     }
 
 	public void clientRead(ChannelHandlerContext ctx, String incoming) throws Exception
@@ -136,6 +138,11 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
     public void write(String incoming)
     {
         chooseWrite(incoming + "\r\n");
+    }
+
+    public void close()
+    {
+        channelHandlerCtx.close();
     }
 
     private void chooseRead(ChannelHandlerContext ctx, String incoming) throws Exception

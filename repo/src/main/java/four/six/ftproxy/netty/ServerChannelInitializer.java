@@ -1,7 +1,5 @@
 package four.six.ftproxy.netty;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelInitializer;
@@ -9,17 +7,16 @@ import io.netty.channel.ChannelHandlerContext;
 
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.StringEncoder;
-import four.six.ftproxy.netty.LineHandler;
 
 public class ServerChannelInitializer extends ChannelInitializer<SocketChannel>
 {
     private static final StringDecoder DECODER = new StringDecoder();
     private static final StringEncoder ENCODER = new StringEncoder();
-    private ChannelHandler last;
+    private ChannelHandler lineHandler;
 
-    public ServerChannelInitializer(ChannelHandler l)
+    public ServerChannelInitializer(ChannelHandler lh)
     {
-        last = l;
+        lineHandler = lh;
     }
 
     @Override
@@ -27,7 +24,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel>
     {
         ch.pipeline().addLast(DECODER,
                               ENCODER,
-                              last); //new LineHandler(true));
+                              lineHandler);
     }
 
     @Override
