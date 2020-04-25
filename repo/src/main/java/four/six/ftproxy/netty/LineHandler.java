@@ -12,6 +12,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.net.InetAddress;
 import java.util.Date;
 
+import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.ServerChannelInitializer;
@@ -47,7 +48,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
         channelHandlerCtx = ctx;
         if (isServer == false)
         {
-            System.out.println("Channel active!");
+            Util.log("Client channel active!");
             ctx.write("Welcome to " + InetAddress.getLocalHost().getHostName() + "!\r\n");
             ctx.write("It is " + new Date() + " now.\r\n");
             ctx.flush();
@@ -59,22 +60,23 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
                                {
                                    if (f.isSuccess())
                                    {
-                                       System.out.println("Server channel connected");
+                                       Util.log("Server channel connected");
                                    } else {
-                                       System.out.println("Server channel failed to connect");
+                                       Util.log("Server channel failed to connect");
                                        channelHandlerCtx.close();
                                    }
                                }
                            });
         } else {
             serverReady = true;
+            Util.log("Backend server channel active!");
         }
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
-        System.out.println("LineHandler: removed");
+        Util.log("LineHandler: removed");
         if (other != null)
             other.close();
     }
@@ -84,7 +86,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
         lp.add(incoming);
         if (other == null)
         {
-            System.out.println("Can't find server side context; stashing read");
+            Util.log("Can't find server side context; stashing read");
             return;
         }
         while (true)
@@ -93,7 +95,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
             if (line == null)
                 break;
             other.write(line);
-            System.out.println("[from client] " + line);
+            Util.log("[from client] " + line);
         }
     }
 
@@ -106,7 +108,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
             if (line == null)
                 break;
             other.write(line);
-            System.out.println("[from server] " + line);
+            Util.log("[from server] " + line);
         }
     }
 
@@ -120,7 +122,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
     {
         if (!serverReady)
         {
-            System.out.println("Discarding writes: server not ready");
+            Util.log("Discarding writes: server not ready");
         } else {
             channelHandlerCtx.write(incoming);
             channelHandlerCtx.flush();
@@ -156,7 +158,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        System.out.println(incoming);
+        Util.log(incoming);
         chooseRead(ctx, incoming);
     }
 

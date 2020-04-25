@@ -7,6 +7,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+
 public class Util
 {
     private static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
@@ -26,4 +31,18 @@ public class Util
         System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
     public static final int REMOTE_PORT =
         Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
+
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    static {
+        LOGGER.setLevel(Level.FINEST);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        LOGGER.addHandler(handler);
+    }
+
+    public static void log(String msg)
+    {
+        LOGGER.fine(msg);
+    }
 }
