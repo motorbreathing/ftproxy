@@ -1,5 +1,12 @@
 package four.six.ftproxy.util;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
+
 public class Util
 {
     private static final String DEFAULT_HOST_STR = "127.0.0.1";

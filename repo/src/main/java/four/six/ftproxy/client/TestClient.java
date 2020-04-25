@@ -14,26 +14,19 @@ import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.StringEncoder;
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.TestClientHandler;
+import four.six.ftproxy.util.Util;
 
 public class TestClient {
-    static final String DEFAULT_HOST_STR = "127.0.0.1";
-    static final String DEFAULT_PORT_STR = "8080";
-    static final String HOST = System.getProperty("host", DEFAULT_HOST_STR);
-    static final int PORT = Integer.parseInt(System.getProperty("port", DEFAULT_PORT_STR));
-
-    private void setupChannelInitializer(Bootstrap b)
+    private ChannelInitializer<? extends Channel> getChannelInitializer()
     {
-        ChannelInitializer<SocketChannel> myChan =
-            new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch)
-                  throws Exception {
-                    ch.pipeline().addLast(new StringDecoder(),
-                                          new StringEncoder(),
-                                          new TestClientHandler());
-                }
-            };
-        b.handler(myChan);
+        return new ChannelInitializer<SocketChannel>() {
+                       @Override
+                       public void initChannel(SocketChannel ch) throws Exception {
+                           ch.pipeline().addLast(new StringDecoder(),
+                                                 new StringEncoder(),
+                                                 new TestClientHandler());
+                       }
+                   };
     }
 
     public static void main(String[] args) throws Exception
@@ -67,10 +60,8 @@ public class TestClient {
     public void connect() throws Exception
     {
         try {
-            Bootstrap b = NettyUtil.getClientBootstrap();
-            b.option(ChannelOption.SO_KEEPALIVE, true);
-            setupChannelInitializer(b);
-            ChannelFuture f = b.connect(HOST, PORT).sync();
+            ChannelFuture f = NettyUtil.getChannelToProxy(getChannelInitializer());
+            f.sync();
             doWork(f.channel());
         } finally {
             NettyUtil.shutdown();
