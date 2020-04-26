@@ -32,17 +32,18 @@ public class Util
     public static final int REMOTE_PORT =
         Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
 
-    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     static {
-        LOGGER.setLevel(Level.FINEST);
+        logger.setLevel(Level.FINE);
+        logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        LOGGER.addHandler(handler);
+        handler.setLevel(Level.FINE);
+        logger.addHandler(handler);
     }
 
     public static void log(String msg)
     {
-        LOGGER.fine(msg);
+        logger.fine(msg);
     }
 }

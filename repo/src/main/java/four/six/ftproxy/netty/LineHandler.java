@@ -63,6 +63,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
                                        Util.log("Server channel connected");
                                    } else {
                                        Util.log("Server channel failed to connect");
+                                       channelHandlerCtx.writeAndFlush("FTP server unavailable\r\n");
                                        channelHandlerCtx.close();
                                    }
                                }
@@ -144,7 +145,8 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
 
     public void close()
     {
-        channelHandlerCtx.close();
+        if (channelHandlerCtx != null)
+            channelHandlerCtx.close();
     }
 
     private void chooseRead(ChannelHandlerContext ctx, String incoming) throws Exception

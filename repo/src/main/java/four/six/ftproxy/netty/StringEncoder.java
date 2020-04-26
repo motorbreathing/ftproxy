@@ -12,6 +12,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import four.six.ftproxy.util.Util;
+
 @Sharable
 public class StringEncoder extends MessageToMessageEncoder<CharSequence> {
 
@@ -44,6 +46,6 @@ public class StringEncoder extends MessageToMessageEncoder<CharSequence> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
-        System.out.println("StringEncoder: removed");
+        Util.log("StringEncoder: removed");
     }
 }

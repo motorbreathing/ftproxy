@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.StringEncoder;
 import four.six.ftproxy.netty.LineHandler;
+import four.six.ftproxy.util.Util;
 
 public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
 {
@@ -27,7 +28,7 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>
     public void exceptionCaught(ChannelHandlerContext ctx,
                                 Throwable cause) throws Exception
     {
-        System.out.println("ClientChannelInitializer: caught exception!");
+        Util.log("ClientChannelInitializer: caught exception");
         cause.printStackTrace();
         ctx.close();
     }
