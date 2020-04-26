@@ -20,138 +20,132 @@ import four.six.ftproxy.netty.ServerChannelInitializer;
 @Sharable
 public class LineHandler extends SimpleChannelInboundHandler<String> {
 
-    private LineProvider lp;
-    private boolean isServer;
-    private LineHandler other;
-    private ChannelHandlerContext channelHandlerCtx;
+    private LineProvider clp;
+    private LineProvider slp;
+    private ChannelHandlerContext serverCtx;
+    private ChannelHandlerContext clientCtx;
     private boolean serverReady;
 
     public LineHandler()
     {
-        init(false, null);
+        clp = new LineProvider();
     }
 
-    public LineHandler(boolean serverflag, LineHandler o)
+    private void welcomeClient() throws Exception
     {
-        init(serverflag, o);
+        clientCtx.write("Welcome to " + InetAddress.getLocalHost().getHostName() + "!\r\n");
+        clientCtx.write("It is " + new Date() + " now.\r\n");
+        clientCtx.flush();
     }
 
-    private void init(boolean serverflag, LineHandler o)
+    private void initiateServerConnect()
     {
-        lp = new LineProvider();
-        other = o;
-        isServer = serverflag;
+        ChannelFuture cf =
+            NettyUtil.getChannelToRemoteHost(new ServerChannelInitializer(this));
+        ChannelFutureListener cfl =
+            new ChannelFutureListener() {
+                public void operationComplete(ChannelFuture f)
+                {
+                    if (f.isSuccess())
+                    {
+                        Util.log("Server channel connected");
+                    } else {
+                        Util.log("Server channel failed to connect");
+                        clientCtx.writeAndFlush("FTP server unavailable\r\n");
+                        clientCtx.close();
+                    }
+                }
+            };
+        cf.addListener(cfl);
+    }
+
+    // Process a new incoming client connection
+    private void clientActive(ChannelHandlerContext ctx) throws Exception
+    {
+        Util.log("Client channel active!");
+        clientCtx = ctx;
+        welcomeClient();
+        initiateServerConnect();
+    }
+
+    // Process a new backend/server connection
+    private void serverActive(ChannelHandlerContext ctx)
+    {
+        Util.log("Backend server channel active!");
+        serverCtx = ctx;
+        slp = new LineProvider();
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        channelHandlerCtx = ctx;
-        if (isServer == false)
-        {
-            Util.log("Client channel active!");
-            ctx.write("Welcome to " + InetAddress.getLocalHost().getHostName() + "!\r\n");
-            ctx.write("It is " + new Date() + " now.\r\n");
-            ctx.flush();
-            other = new LineHandler(true, this);
-            ChannelFuture cf =
-                NettyUtil.getChannelToRemoteHost(new ServerChannelInitializer(other));
-            cf.addListener(new ChannelFutureListener() {
-                               public void operationComplete(ChannelFuture f)
-                               {
-                                   if (f.isSuccess())
-                                   {
-                                       Util.log("Server channel connected");
-                                   } else {
-                                       Util.log("Server channel failed to connect");
-                                       channelHandlerCtx.writeAndFlush("FTP server unavailable\r\n");
-                                       channelHandlerCtx.close();
-                                   }
-                               }
-                           });
-        } else {
-            serverReady = true;
-            Util.log("Backend server channel active!");
-        }
+    public void channelActive(ChannelHandlerContext ctx) throws Exception
+    {
+        if (clientCtx == null)
+            clientActive(ctx);
+        else
+            serverActive(ctx);
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
         Util.log("LineHandler: removed");
-        if (other != null)
-            other.close();
+        removePeerHandler(ctx);
+    }
+
+    private void removePeerHandler(ChannelHandlerContext ctx)
+    {
+        if (ctx == serverCtx)
+            clientCtx.close();
+        else if (ctx == clientCtx)
+            serverCtx.close();
+        else
+            Util.log("removePeerHandler: unknown context");
     }
 
 	public void clientRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        lp.add(incoming);
-        if (other == null)
+        clp.add(incoming);
+        if (serverCtx == null)
         {
             Util.log("Can't find server side context; stashing read");
             return;
         }
+        flushToServer();
+    }
+
+    private void flushToServer()
+    {
         while (true)
         {
-            String line = lp.getLine();
+            String line = clp.getLine();
             if (line == null)
                 break;
-            other.write(line);
+            serverCtx.writeAndFlush(line + "\r\n");
             Util.log("[from client] " + line);
         }
     }
 
 	public void serverRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        lp.add(incoming);
+        slp.add(incoming);
+        flushToClient();
+    }
+
+    private void flushToClient()
+    {
         while (true)
         {
-            String line = lp.getLine();
+            String line = slp.getLine();
             if (line == null)
                 break;
-            other.write(line);
+            clientCtx.writeAndFlush(line + "\r\n");
             Util.log("[from server] " + line);
         }
     }
 
-    private void clientWrite(String incoming)
-    {
-        channelHandlerCtx.write(incoming);
-        channelHandlerCtx.flush();
-    }
-
-    private void serverWrite(String incoming)
-    {
-        if (!serverReady)
-        {
-            Util.log("Discarding writes: server not ready");
-        } else {
-            channelHandlerCtx.write(incoming);
-            channelHandlerCtx.flush();
-        }
-    }
-
-    private void chooseWrite(String incoming)
-    {
-        if (isServer)
-            serverWrite(incoming);
-        else
-            clientWrite(incoming);
-    }
-
-    public void write(String incoming)
-    {
-        chooseWrite(incoming + "\r\n");
-    }
-
-    public void close()
-    {
-        if (channelHandlerCtx != null)
-            channelHandlerCtx.close();
-    }
-
     private void chooseRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        if (isServer)
+        if (ctx == serverCtx)
             serverRead(ctx, incoming);
         else
             clientRead(ctx, incoming);
@@ -160,7 +154,6 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        Util.log(incoming);
         chooseRead(ctx, incoming);
     }
 

@@ -13,6 +13,8 @@ import io.netty.util.internal.ObjectUtil;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import four.six.ftproxy.util.Util;
+
 @Sharable
 public class StringDecoder extends MessageToMessageDecoder<ByteBuf> {
 
@@ -41,6 +43,6 @@ public class StringDecoder extends MessageToMessageDecoder<ByteBuf> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
-        System.out.println("StringDecoder: removed");
+        Util.log("StringDecoder: removed");
     }
 }

@@ -41,20 +41,20 @@ public class NettyUtil
     }
 
     public static ChannelFuture
-        getChannelToRemoteHost(ChannelInitializer<? extends Channel> ci) throws Exception
+        getChannelToRemoteHost(ChannelInitializer<? extends Channel> ci)
     {
         return getChannelToHost(Util.REMOTE_HOST, Util.REMOTE_PORT, ci);
     }
 
     public static ChannelFuture
-        getChannelToProxy(ChannelInitializer<? extends Channel> ci) throws Exception
+        getChannelToProxy(ChannelInitializer<? extends Channel> ci)
     {
         return getChannelToHost(Util.THIS_HOST, Util.THIS_PORT, ci);
     }
 
     public static ChannelFuture
         getChannelToHost(String host, int port,
-                         ChannelInitializer<? extends Channel> ci) throws Exception
+                         ChannelInitializer<? extends Channel> ci)
     {
         Bootstrap b = getClientBootstrap();
         b.option(ChannelOption.SO_KEEPALIVE, true);
