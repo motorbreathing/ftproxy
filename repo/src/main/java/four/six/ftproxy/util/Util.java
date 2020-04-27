@@ -1,11 +1,6 @@
 package four.six.ftproxy.util;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
+import java.nio.charset.Charset;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +9,13 @@ import java.util.logging.ConsoleHandler;
 
 public class Util
 {
+    public static final String UTF8_STR = "UTF-8";
+    public static final Charset UTF8charset = Charset.forName(UTF8_STR);
+    public static final char LF = '\n';
+    public static final char CR = '\r';
+    public static final String CRLF = "\r\n";
+    public static final String EMPTYSTRING = "";
+
     private static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
     private static final String DEFAULT_THIS_PORT_STR = "8080";
     private static final String DEFAULT_REMOTE_HOST_STR = "127.0.0.1";

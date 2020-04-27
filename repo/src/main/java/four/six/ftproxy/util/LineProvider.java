@@ -1,16 +1,12 @@
 package four.six.ftproxy.util;
 
-import java.nio.charset.Charset;
 import io.netty.buffer.ByteBuf;
+
+import four.six.ftproxy.util.Util;
 
 public class LineProvider
 {
-    private static final String UTF8_STR = "UTF-8";
-    private static final Charset charset = Charset.forName(UTF8_STR);
-    private static final char LF = '\n';
-    private static final char CR = '\r';
-    private static final String EMPTYSTRING = "";
-    private String stash = EMPTYSTRING;
+    private String stash = Util.EMPTYSTRING;
 
     public LineProvider()
     {
@@ -24,7 +20,7 @@ public class LineProvider
 
     public LineProvider(ByteBuf b)
     {
-        add(b.toString(charset));
+        add(b.toString(Util.UTF8charset));
     }
 
     public void add(String s)
@@ -43,20 +39,20 @@ public class LineProvider
         if (stash.length() == 0)
             return null;
 
-        int index = stash.indexOf(LF);
+        int index = stash.indexOf(Util.LF);
         // Have stashed data, but yet to see a newline
         if (index < 0)
             return null;
 
-        String result = EMPTYSTRING;
+        String result = Util.EMPTYSTRING;
         if (index > 0) {
             // Grab everything that precedes the newline
             result = stash.substring(0, index);
-            if (result.charAt(result.length() - 1) == CR)
+            if (result.charAt(result.length() - 1) == Util.CR)
             {
                 // All we had before the newline was a carriage return!
                 if (result.length() == 1)
-                    result = EMPTYSTRING;
+                    result = Util.EMPTYSTRING;
                 else // Lose the carriage return as well
                     result = result.substring(0, result.length() - 1);
             }
@@ -68,7 +64,7 @@ public class LineProvider
             stash = stash.substring(index + 1);
         } else {
             // We have consumed all that was stashed
-            stash = EMPTYSTRING;
+            stash = Util.EMPTYSTRING;
         }
 
         if (result.length() > 0)

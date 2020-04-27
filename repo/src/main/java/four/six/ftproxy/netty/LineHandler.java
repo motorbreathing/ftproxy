@@ -51,7 +51,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
                         Util.log("Server channel connected");
                     } else {
                         Util.log("Server channel failed to connect");
-                        clientCtx.writeAndFlush("FTP server unavailable\r\n");
+                        clientCtx.writeAndFlush("Server unavailable\r\n");
                         clientCtx.close();
                     }
                 }
@@ -113,6 +113,18 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
         flushToServer();
     }
 
+    private String process(String line)
+    {
+        // Default implementation
+        return line;
+    }
+
+    private void processAndWrite(ChannelHandlerContext ctx, String line)
+    {
+        line = process(line);
+        ctx.writeAndFlush(line + Util.CRLF);
+    }
+
     private void flushToServer()
     {
         while (true)
@@ -120,7 +132,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
             String line = clp.getLine();
             if (line == null)
                 break;
-            serverCtx.writeAndFlush(line + "\r\n");
+            processAndWrite(serverCtx, line);
             Util.log("[from client] " + line);
         }
     }
@@ -138,7 +150,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
             String line = slp.getLine();
             if (line == null)
                 break;
-            clientCtx.writeAndFlush(line + "\r\n");
+            processAndWrite(clientCtx, line);
             Util.log("[from server] " + line);
         }
     }
