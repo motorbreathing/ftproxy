@@ -38,7 +38,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         clientCtx.flush();
     }
 
-    private ChannelHandler getChannelHandler()
+    public ChannelHandler getChannelHandler()
     {
         return this;
     }
@@ -125,7 +125,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         flushToServer();
     }
 
-    private String process(String line)
+    public String process(String line)
     {
         // Default implementation
         return line;

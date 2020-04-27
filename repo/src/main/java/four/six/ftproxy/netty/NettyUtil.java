@@ -13,6 +13,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 
 import four.six.ftproxy.util.Util;
+import four.six.ftproxy.ftp.FTPUtil;
 import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class NettyUtil 
@@ -66,7 +67,7 @@ public class NettyUtil
     public static ChannelFuture
         getFTProxyServerChannel() throws Exception
     {
-        return getServerChannel(new TextRelayChannelInitializer());
+        return getServerChannel(FTPUtil.getFTPChannelInitializer());
     }
 
     public static ChannelFuture
