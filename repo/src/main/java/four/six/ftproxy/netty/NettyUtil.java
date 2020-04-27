@@ -13,12 +13,12 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 
 import four.six.ftproxy.util.Util;
+import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class NettyUtil 
 {
     public static EventLoopGroup bossGroup = new NioEventLoopGroup();
     public static EventLoopGroup workerGroup = new NioEventLoopGroup();
-
 
     public static void shutdown()
     {
@@ -61,5 +61,22 @@ public class NettyUtil
         if (ci != null)
             b.handler(ci);
         return b.connect(host, port);
+    }
+
+    public static ChannelFuture
+        getFTProxyServerChannel() throws Exception
+    {
+        return getServerChannel(new TextRelayChannelInitializer());
+    }
+
+    public static ChannelFuture
+        getServerChannel(ChannelInitializer<? extends Channel> ci) throws Exception
+    {
+        ServerBootstrap b = getServerBootstrap();
+        if (ci != null)
+            b.childHandler(ci);
+        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        return b.bind(Util.THIS_PORT).sync();
     }
 }

@@ -1,29 +1,17 @@
 package four.six.ftproxy.server;
 
-import io.netty.channel.ChannelOption;
-
-import four.six.ftproxy.netty.ClientChannelInitializer;
 import four.six.ftproxy.netty.NettyUtil;
-import four.six.ftproxy.util.Util;
 
 public class FTProxy
 {
-    static final int SERVER_BACKLOG = 128;
-
     public static void main(String[] args) throws Exception
     {   
         new FTProxy().run();
     }
 
-    private void runServer() throws InterruptedException
+    private void runServer() throws Exception
     {
-        NettyUtil.getServerBootstrap()
-        .childHandler(new ClientChannelInitializer())
-        .option(ChannelOption.SO_BACKLOG, SERVER_BACKLOG)
-        .childOption(ChannelOption.SO_KEEPALIVE, true)
-        .bind(Util.THIS_PORT).sync()
-        .channel().closeFuture().sync();
-
+        NettyUtil.getFTProxyServerChannel().channel().closeFuture().sync();
     }
 
     public void run() throws Exception

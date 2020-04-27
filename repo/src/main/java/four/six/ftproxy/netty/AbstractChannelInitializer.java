@@ -1,38 +1,34 @@
 package four.six.ftproxy.netty;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelHandler;
 
 import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.StringEncoder;
+import four.six.ftproxy.netty.TextRelayHandler;
 import four.six.ftproxy.util.Util;
 
-public class ServerChannelInitializer extends ChannelInitializer<SocketChannel>
+abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel>
 {
-    private static final StringDecoder DECODER = new StringDecoder();
-    private static final StringEncoder ENCODER = new StringEncoder();
-    private ChannelHandler lineHandler;
-
-    public ServerChannelInitializer(ChannelHandler lh)
-    {
-        lineHandler = lh;
-    }
+    abstract ChannelHandler getDecoder();
+    abstract ChannelHandler getEncoder();
+    abstract ChannelHandler getProtocolHandler();
 
     @Override
     public void initChannel(SocketChannel ch) throws Exception
     {
-        ch.pipeline().addLast(DECODER,
-                              ENCODER,
-                              lineHandler);
+        ch.pipeline().addLast(getDecoder(),
+                              getEncoder(),
+                              getProtocolHandler());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx,
                                 Throwable cause) throws Exception
     {
-        Util.log("ServerChannelInitializer: caught exception");
+        Util.log("ChannelInitializer: caught exception");
         cause.printStackTrace();
         ctx.close();
     }

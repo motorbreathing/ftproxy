@@ -5,6 +5,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -15,10 +16,9 @@ import java.util.Date;
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.netty.NettyUtil;
-import four.six.ftproxy.netty.ServerChannelInitializer;
 
 @Sharable
-public class LineHandler extends SimpleChannelInboundHandler<String> {
+public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     private LineProvider clp;
     private LineProvider slp;
@@ -26,7 +26,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
     private ChannelHandlerContext clientCtx;
     private boolean serverReady;
 
-    public LineHandler()
+    public TextRelayHandler()
     {
         clp = new LineProvider();
     }
@@ -38,10 +38,22 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
         clientCtx.flush();
     }
 
+    private ChannelHandler getChannelHandler()
+    {
+        return this;
+    }
+
     private void initiateServerConnect()
     {
-        ChannelFuture cf =
-            NettyUtil.getChannelToRemoteHost(new ServerChannelInitializer(this));
+        TextRelayChannelInitializer selfPointer = 
+                new TextRelayChannelInitializer() {
+                    @Override
+                    public ChannelHandler getProtocolHandler()
+                    {
+                        return getChannelHandler();
+                    }
+                };
+        ChannelFuture cf = NettyUtil.getChannelToRemoteHost(selfPointer);
         ChannelFutureListener cfl =
             new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture f)
@@ -88,7 +100,7 @@ public class LineHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx)
     {
-        Util.log("LineHandler: removed");
+        Util.log("TextRelayHandler: removed");
         removePeerHandler(ctx);
     }
 
