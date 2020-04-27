@@ -1,5 +1,6 @@
 package four.six.ftproxy.server;
 
+import four.six.ftproxy.ftp.FTPUtil;
 import four.six.ftproxy.netty.NettyUtil;
 
 public class FTProxy
@@ -11,7 +12,7 @@ public class FTProxy
 
     private void runServer() throws Exception
     {
-        NettyUtil.getFTProxyServerChannel().channel().closeFuture().sync();
+        FTPUtil.getFTProxyServerChannel().channel().closeFuture().sync();
     }
 
     public void run() throws Exception

@@ -65,12 +65,6 @@ public class NettyUtil
     }
 
     public static ChannelFuture
-        getFTProxyServerChannel() throws Exception
-    {
-        return getServerChannel(FTPUtil.getFTPChannelInitializer());
-    }
-
-    public static ChannelFuture
         getServerChannel(ChannelInitializer<? extends Channel> ci) throws Exception
     {
         ServerBootstrap b = getServerBootstrap();
