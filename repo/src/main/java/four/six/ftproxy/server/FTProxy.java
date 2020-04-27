@@ -1,4 +1,4 @@
-package four.six.ftproxy.core;
+package four.six.ftproxy.server;
 
 import io.netty.channel.ChannelOption;
 
