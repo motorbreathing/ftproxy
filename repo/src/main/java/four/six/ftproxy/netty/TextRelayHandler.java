@@ -20,22 +20,15 @@ import four.six.ftproxy.netty.NettyUtil;
 @Sharable
 public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
-    private LineProvider clp;
-    private LineProvider slp;
+    private LineProvider clientData;
+    private LineProvider serverData;
     private ChannelHandlerContext serverCtx;
     private ChannelHandlerContext clientCtx;
     private boolean serverReady;
 
     public TextRelayHandler()
     {
-        clp = new LineProvider();
-    }
-
-    private void welcomeClient() throws Exception
-    {
-        clientCtx.write("Welcome to " + InetAddress.getLocalHost().getHostName() + "!\r\n");
-        clientCtx.write("It is " + new Date() + " now.\r\n");
-        clientCtx.flush();
+        clientData = new LineProvider();
     }
 
     public ChannelHandler getChannelHandler()
@@ -54,6 +47,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                     }
                 };
         ChannelFuture cf = NettyUtil.getChannelToRemoteHost(selfPointer);
+
         ChannelFutureListener cfl =
             new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture f)
@@ -71,21 +65,30 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         cf.addListener(cfl);
     }
 
+    private void initializeClient(ChannelHandlerContext ctx)
+    {
+        clientCtx = ctx;
+        initiateServerConnect();
+    }
+
+    private void initializeServer(ChannelHandlerContext ctx)
+    {
+        serverCtx = ctx;
+        serverData = new LineProvider();
+    }
+
     // Process a new incoming client connection
     private void clientActive(ChannelHandlerContext ctx) throws Exception
     {
-        Util.log("Client channel active!");
-        clientCtx = ctx;
-        welcomeClient();
-        initiateServerConnect();
+        Util.log("Client channel active");
+        initializeClient(ctx);
     }
 
     // Process a new backend/server connection
     private void serverActive(ChannelHandlerContext ctx)
     {
-        Util.log("Backend server channel active!");
-        serverCtx = ctx;
-        slp = new LineProvider();
+        Util.log("Backend server channel active");
+        initializeServer(ctx);
     }
 
     @Override
@@ -106,17 +109,18 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     private void removePeerHandler(ChannelHandlerContext ctx)
     {
-        if (ctx == serverCtx)
+        if (ctx == serverCtx) {
             clientCtx.close();
-        else if (ctx == clientCtx)
+        } else if (ctx == clientCtx) {
             serverCtx.close();
-        else
-            Util.log("removePeerHandler: unknown context");
+        } else {
+            throw new IllegalStateException("Attempt to close unknown channel handler context");
+        }
     }
 
 	public void clientRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        clp.add(incoming);
+        clientData.add(incoming);
         if (serverCtx == null)
         {
             Util.log("Can't find server side context; stashing read");
@@ -141,7 +145,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     {
         while (true)
         {
-            String line = clp.getLine();
+            String line = clientData.getLine();
             if (line == null)
                 break;
             processAndWrite(serverCtx, line);
@@ -151,7 +155,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
 	public void serverRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        slp.add(incoming);
+        serverData.add(incoming);
         flushToClient();
     }
 
@@ -159,7 +163,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     {
         while (true)
         {
-            String line = slp.getLine();
+            String line = serverData.getLine();
             if (line == null)
                 break;
             processAndWrite(clientCtx, line);
