@@ -5,7 +5,7 @@ public class FTPTrivialCommand implements FTPCommand {
 
     public FTPTrivialCommand(String line)
     {
-        command = line;
+        command = line.trim();
     }
 
     // The 'default' behavior: pass on a command, unmodified, to the server
@@ -14,5 +14,11 @@ public class FTPTrivialCommand implements FTPCommand {
     public String execute()
     {
         return command;
+    }
+
+    @Override
+    public String getName()
+    {
+        return getClass().getName();
     }
 }
