@@ -1,11 +1,11 @@
 package four.six.ftproxy.ftp;
 
-import four.six.ftproxy.ftp.FTPNoAction;
+import four.six.ftproxy.ftp.FTPTrivialCommand;
 
 public class FTPCommandFactory {
-    public FTPCommand getCommand(String line)
+    public static FTPCommand getCommand(String line)
     {
         // default
-        return new FTPNoAction();
+        return new FTPTrivialCommand(line);
     }
 };

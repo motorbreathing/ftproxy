@@ -16,6 +16,7 @@ import java.util.Date;
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.netty.NettyUtil;
+import four.six.ftproxy.ftp.FTPCommandFactory;
 
 @Sharable
 public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
@@ -131,8 +132,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     public String process(String line)
     {
-        // Default implementation
-        return line;
+        return FTPCommandFactory.getCommand(line).execute();
     }
 
     private void processAndWrite(ChannelHandlerContext ctx, String line)
