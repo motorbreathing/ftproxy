@@ -19,11 +19,13 @@ public class FTPAuthCommand extends FTPTrivialCommand
             // Enable SSL - towards client
             handler.enableClientSSL();
             // Forward original "AUTH SSL/TLS" command to server
-            super.execute();
+            return super.execute();
         } else {
             handler.writeToClient(FTPUtil.UNRECOGNIZED_COMMAND_STR);
+            // No need to trouble the server; we didn't like what we received
+            // from the client, so we have complained straight back to the
+            // client rather than forward the dubious command to the server
+            return null;
         }
-
-        return null;
     }
 }

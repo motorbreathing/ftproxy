@@ -43,6 +43,9 @@ public class Util
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+    public static final int dataPortMin = 1025;
+    public static final int dataPortMax = 65535;
+
     static {
         logger.setLevel(Level.FINE);
         logger.setUseParentHandlers(false);
