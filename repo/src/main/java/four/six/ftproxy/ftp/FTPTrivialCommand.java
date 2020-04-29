@@ -1,11 +1,17 @@
 package four.six.ftproxy.ftp;
 
-public class FTPTrivialCommand implements FTPCommand {
-    protected String command;
+import four.six.ftproxy.util.Util;
 
-    public FTPTrivialCommand(String line)
+public class FTPTrivialCommand implements FTPCommand {
+    protected String[] args;
+    protected FTPRelayHandler handler;
+    protected Object origin;
+
+    public FTPTrivialCommand(String args[], Object origin, FTPRelayHandler h)
     {
-        command = line.trim();
+        this.args = args;
+        this.origin = origin;
+        handler = h;
     }
 
     // The 'default' behavior: pass on a command, unmodified, to the server
@@ -13,7 +19,14 @@ public class FTPTrivialCommand implements FTPCommand {
     @Override
     public String execute()
     {
-        return command;
+        String original = "";
+        for (String word : args)
+        {
+            original += word;
+            // XXX
+            original += " ";
+        }
+        return original + Util.CRLF;
     }
 
     @Override

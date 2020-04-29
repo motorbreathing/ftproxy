@@ -7,9 +7,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelHandler;
 
-import four.six.ftproxy.netty.StringDecoder;
-import four.six.ftproxy.netty.StringEncoder;
-import four.six.ftproxy.netty.TextRelayHandler;
 import four.six.ftproxy.util.Util;
 
 public class TextRelayChannelInitializer extends AbstractChannelInitializer

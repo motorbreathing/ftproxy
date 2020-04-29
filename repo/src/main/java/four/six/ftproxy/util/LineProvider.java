@@ -2,8 +2,6 @@ package four.six.ftproxy.util;
 
 import io.netty.buffer.ByteBuf;
 
-import four.six.ftproxy.util.Util;
-
 public class LineProvider
 {
     private String stash = Util.EMPTYSTRING;

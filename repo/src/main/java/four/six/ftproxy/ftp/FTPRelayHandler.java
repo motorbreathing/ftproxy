@@ -3,7 +3,6 @@ package four.six.ftproxy.ftp;
 import io.netty.channel.ChannelHandler;
 
 import four.six.ftproxy.netty.TextRelayHandler;
-import four.six.ftproxy.ftp.FTPCommandFactory;
 
 public class FTPRelayHandler extends TextRelayHandler
 {
@@ -14,8 +13,8 @@ public class FTPRelayHandler extends TextRelayHandler
     }
 
     @Override
-    public String process(String line)
+    public String process(String line, Object origin)
     {
-        return FTPCommandFactory.getCommand(line).execute();
+        return FTPCommandFactory.getCommand(line, origin, this).execute();
     }
 }

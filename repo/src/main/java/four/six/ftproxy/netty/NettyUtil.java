@@ -14,7 +14,6 @@ import io.netty.bootstrap.ServerBootstrap;
 
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.ftp.FTPUtil;
-import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class NettyUtil 
 {

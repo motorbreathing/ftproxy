@@ -15,6 +15,7 @@ public class Util
     public static final char CR = '\r';
     public static final String CRLF = "\r\n";
     public static final String EMPTYSTRING = "";
+    public static final String REGEX_SPLIT_BY_SPACES = "\\s+";
 
     private static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
     private static final String DEFAULT_THIS_PORT_STR = "8080";

@@ -3,11 +3,13 @@ package four.six.ftproxy.ftp;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 
-import four.six.ftproxy.ftp.FTPChannelInitializer;
 import four.six.ftproxy.netty.NettyUtil;
 
 public class FTPUtil
 {
+    public static final String UNRECOGNIZED_COMMAND_STR =
+        "500 Syntax error - command unrecognized\r\n";
+
     public static ChannelInitializer getFTPChannelInitializer()
     {
         return new FTPChannelInitializer();

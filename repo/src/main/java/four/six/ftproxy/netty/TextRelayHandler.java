@@ -10,12 +10,9 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.net.InetAddress;
-import java.util.Date;
-
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
-import four.six.ftproxy.netty.NettyUtil;
+import four.six.ftproxy.ssl.SSLHandlerProvider;
 
 @Sharable
 public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
@@ -114,8 +111,15 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         } else if (ctx == clientCtx) {
             serverCtx.close();
         } else {
-            throw new IllegalStateException("Attempt to close unknown channel handler context");
+            throw new IllegalStateException("close: unknown channel handler context");
         }
+    }
+
+    public void enableSSL(Object origin)
+    {
+        ChannelHandlerContext ctx = (ChannelHandlerContext)origin;
+        SocketChannel ch = (SocketChannel)ctx.channel();
+        ctx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
     }
 
 	public void clientRead(ChannelHandlerContext ctx, String incoming) throws Exception
@@ -129,17 +133,47 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         flushToServer();
     }
 
-    public String process(String line)
+	public void serverRead(ChannelHandlerContext ctx, String incoming) throws Exception
+    {
+        serverData.add(incoming);
+        flushToClient();
+    }
+
+    public void replyToOrigin(String line, Object origin)
+    {
+        ChannelHandlerContext ctx = (ChannelHandlerContext)origin;
+        if (ctx == clientCtx || ctx == serverCtx)
+            ctx.writeAndFlush(line);
+        else
+            throw new IllegalStateException("replyToOrigin: unknown channel handler context");
+    }
+
+    public void relayToPeer(String line, Object origin)
+    {
+        ChannelHandlerContext ctx = (ChannelHandlerContext)origin;
+        if (ctx == clientCtx)
+            serverCtx.writeAndFlush(line);
+        else if (ctx == serverCtx)
+            clientCtx.writeAndFlush(line);
+        else
+            throw new IllegalStateException("relayToPeer: unknown channel handler context");
+    }
+
+    public String process(String line, Object origin)
     {
         return line;
     }
 
-    private void processAndWrite(ChannelHandlerContext ctx, String line)
+    private void processAndWrite(ChannelHandlerContext origin,
+                                 ChannelHandlerContext peer,
+                                 String line)
     {
-        line = process(line);
-        Util.log("[processed line] " + line);
-        if (line.length() > 0)
-            ctx.writeAndFlush(line + Util.CRLF);
+        line = process(line, origin);
+        if (line != null && line.length() > 0)
+        {
+            Util.log("[processed line] " + line);
+            peer.writeAndFlush(line);
+        }
     }
 
     private void flushToServer()
@@ -149,15 +183,9 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             String line = clientData.getLine();
             if (line == null)
                 break;
-            processAndWrite(serverCtx, line);
             Util.log("[from client] " + line);
+            processAndWrite(clientCtx, serverCtx, line);
         }
-    }
-
-	public void serverRead(ChannelHandlerContext ctx, String incoming) throws Exception
-    {
-        serverData.add(incoming);
-        flushToClient();
     }
 
     private void flushToClient()
@@ -167,8 +195,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             String line = serverData.getLine();
             if (line == null)
                 break;
-            processAndWrite(clientCtx, line);
             Util.log("[from server] " + line);
+            processAndWrite(serverCtx, clientCtx, line);
         }
     }
 
