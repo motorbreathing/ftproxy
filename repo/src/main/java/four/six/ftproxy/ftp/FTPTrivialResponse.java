@@ -2,20 +2,20 @@ package four.six.ftproxy.ftp;
 
 import four.six.ftproxy.util.Util;
 
-public class FTPTrivialCommand implements FTPCommand {
+public class FTPTrivialResponse implements FTPResponse {
     protected String[] args;
     protected FTPRelayHandler handler;
 
-    public FTPTrivialCommand(String args[], FTPRelayHandler h)
+    public FTPTrivialResponse(String args[], FTPRelayHandler h)
     {
         this.args = args;
         handler = h;
     }
 
-    // The 'default' behavior: pass on a command, unmodified, to the server
-    // (eg: "user someuser");
+    // The 'default' behavior: pass on a response, unmodified, to the client
+    // (eg: "500 bad command")
     @Override
-    public String execute()
+    public String process()
     {
         return String.join(Util.SPACE, args) + Util.CRLF;
     }

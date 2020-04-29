@@ -14,6 +14,7 @@ public class Util
     public static final char LF = '\n';
     public static final char CR = '\r';
     public static final String CRLF = "\r\n";
+    public static final String SPACE = " ";
     public static final String EMPTYSTRING = "";
     public static final String REGEX_SPLIT_BY_SPACES = "\\s+";
 

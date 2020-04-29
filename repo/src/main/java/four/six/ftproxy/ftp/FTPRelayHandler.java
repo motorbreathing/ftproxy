@@ -15,6 +15,20 @@ public class FTPRelayHandler extends TextRelayHandler
     @Override
     public String processCommand(String line)
     {
-        return FTPCommandFactory.getCommand(line, this).execute();
+        line = line.trim();
+        if (line.length() > 0)
+            return FTPCommandFactory.getCommand(line, this).execute();
+
+        return null;
+    }
+
+    @Override
+    public String processResponse(String line)
+    {
+        line = line.trim();
+        if (line.length() > 0)
+            return FTPResponseFactory.getResponse(line, this).process();
+
+        return null;
     }
 }

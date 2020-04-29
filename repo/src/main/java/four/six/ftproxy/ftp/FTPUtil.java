@@ -10,14 +10,9 @@ public class FTPUtil
     public static final String UNRECOGNIZED_COMMAND_STR =
         "500 Syntax error - command unrecognized\r\n";
 
-    public static ChannelInitializer getFTPChannelInitializer()
-    {
-        return new FTPChannelInitializer();
-    }
-
     public static ChannelFuture
         getFTProxyServerChannel() throws Exception
     {
-        return NettyUtil.getServerChannel(getFTPChannelInitializer());
+        return NettyUtil.getServerChannel(new FTPChannelInitializer());
     }
 }
