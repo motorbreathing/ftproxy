@@ -5,12 +5,10 @@ import four.six.ftproxy.util.Util;
 public class FTPTrivialCommand implements FTPCommand {
     protected String[] args;
     protected FTPRelayHandler handler;
-    protected Object origin;
 
-    public FTPTrivialCommand(String args[], Object origin, FTPRelayHandler h)
+    public FTPTrivialCommand(String args[], FTPRelayHandler h)
     {
         this.args = args;
-        this.origin = origin;
         handler = h;
     }
 

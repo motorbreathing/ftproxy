@@ -5,9 +5,9 @@ public class FTPAuthCommand extends FTPTrivialCommand
     public static final String COMMAND_STR = "AUTH";
     public static final String RESPONSE_STR = "234 Proceed with negotiation\r\n";
 
-    public FTPAuthCommand(String args[], Object origin, FTPRelayHandler h)
+    public FTPAuthCommand(String args[], FTPRelayHandler handler)
     {
-        super(args, origin, h);
+        super(args, handler);
     }
 
     @Override
@@ -15,13 +15,15 @@ public class FTPAuthCommand extends FTPTrivialCommand
     {
         if (args[1].equalsIgnoreCase("SSL") || args[1].equalsIgnoreCase("TLS"))
         {
-            handler.replyToOrigin(RESPONSE_STR, origin);
-            handler.enableSSL(origin);
+            handler.writeToClient(RESPONSE_STR);
+            // Enable SSL - towards client
+            handler.enableClientSSL();
+            // Forward original "AUTH SSL/TLS" command to server
+            super.execute();
         } else {
-            handler.replyToOrigin(FTPUtil.UNRECOGNIZED_COMMAND_STR, origin);
+            handler.writeToClient(FTPUtil.UNRECOGNIZED_COMMAND_STR);
         }
 
-        // Nothing to be relayed to the peer; we've replied directly to the origin
         return null;
     }
 }

@@ -39,7 +39,7 @@ public class SSLHandlerProvider {
         return serverSslContext.newHandler(ch.alloc());
     }
 
-    public static SslHandler getclientSSLHandler(SocketChannel ch){
+    public static SslHandler getClientSSLHandler(SocketChannel ch){
         if (clientSslContext == null)
             return null;
 

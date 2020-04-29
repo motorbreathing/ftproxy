@@ -17,11 +17,18 @@ import four.six.ftproxy.ssl.SSLHandlerProvider;
 @Sharable
 public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
+    // The individual stashes for client/server that hold on to received data
+    // until fully formed lines are seen
     private LineProvider clientData;
     private LineProvider serverData;
+
+    // The individual client/server handler contexts
     private ChannelHandlerContext serverCtx;
     private ChannelHandlerContext clientCtx;
-    private boolean serverReady;
+
+    // Individual SSL statuses
+    boolean clientSSLEnabled;
+    boolean serverSSLEnabled;
 
     public TextRelayHandler()
     {
@@ -115,14 +122,28 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
+    public void enableClientSSL()
+    {
+        SocketChannel ch = (SocketChannel)clientCtx.channel();
+        clientCtx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
+    }
+
+    public void enableServerSSL()
+    {
+        SocketChannel ch = (SocketChannel)serverCtx.channel();
+        serverCtx.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
+    }
+
     public void enableSSL(Object origin)
     {
         ChannelHandlerContext ctx = (ChannelHandlerContext)origin;
-        SocketChannel ch = (SocketChannel)ctx.channel();
-        ctx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
+        if (ctx == clientCtx)
+            enableClientSSL();
+        else
+            enableServerSSL();
     }
 
-	public void clientRead(ChannelHandlerContext ctx, String incoming) throws Exception
+	public void clientRead(String incoming) throws Exception
     {
         clientData.add(incoming);
         if (serverCtx == null)
@@ -133,7 +154,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         flushToServer();
     }
 
-	public void serverRead(ChannelHandlerContext ctx, String incoming) throws Exception
+	public void serverRead(String incoming) throws Exception
     {
         serverData.add(incoming);
         flushToClient();
@@ -159,20 +180,43 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             throw new IllegalStateException("relayToPeer: unknown channel handler context");
     }
 
-    public String process(String line, Object origin)
+    public String processCommand(String line)
     {
-        return line;
+        return line + Util.CRLF;
     }
 
-    private void processAndWrite(ChannelHandlerContext origin,
-                                 ChannelHandlerContext peer,
-                                 String line)
+    public String processResponse(String line)
     {
-        line = process(line, origin);
+        return line + Util.CRLF;
+    }
+
+    public void writeToClient(String line)
+    {
+        clientCtx.writeAndFlush(line);
+    }
+
+    public void writeToServer(String line)
+    {
+        serverCtx.writeAndFlush(line);
+    }
+
+    private void processCommandAndWrite(String line)
+    {
+        line = processCommand(line);
         if (line != null && line.length() > 0)
         {
             Util.log("[processed line] " + line);
-            peer.writeAndFlush(line);
+            writeToServer(line);
+        }
+    }
+
+    private void processResponseAndWrite(String line)
+    {
+        line = processResponse(line);
+        if (line != null && line.length() > 0)
+        {
+            Util.log("[processed line] " + line);
+            writeToClient(line);
         }
     }
 
@@ -184,7 +228,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             if (line == null)
                 break;
             Util.log("[from client] " + line);
-            processAndWrite(clientCtx, serverCtx, line);
+            processCommandAndWrite(line);
         }
     }
 
@@ -196,16 +240,18 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             if (line == null)
                 break;
             Util.log("[from server] " + line);
-            processAndWrite(serverCtx, clientCtx, line);
+            processResponseAndWrite(line);
         }
     }
 
     private void chooseRead(ChannelHandlerContext ctx, String incoming) throws Exception
     {
         if (ctx == serverCtx)
-            serverRead(ctx, incoming);
+            serverRead(incoming);
+        else if (ctx == clientCtx)
+            clientRead(incoming);
         else
-            clientRead(ctx, incoming);
+            throw new IllegalStateException("chooseRead: unknown channel handler context");
     }
 
 	@Override

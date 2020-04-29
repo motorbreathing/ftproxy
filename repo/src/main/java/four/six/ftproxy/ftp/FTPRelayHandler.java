@@ -13,8 +13,8 @@ public class FTPRelayHandler extends TextRelayHandler
     }
 
     @Override
-    public String process(String line, Object origin)
+    public String processCommand(String line)
     {
-        return FTPCommandFactory.getCommand(line, origin, this).execute();
+        return FTPCommandFactory.getCommand(line, this).execute();
     }
 }
