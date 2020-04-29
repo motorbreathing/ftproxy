@@ -10,6 +10,9 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
@@ -29,6 +32,10 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     // Individual SSL statuses
     boolean clientSSLEnabled;
     boolean serverSSLEnabled;
+
+    // Individual addresses that face client/server
+    InetAddress clientFacingAddress;
+    InetAddress serverFacingAddress;
 
     public TextRelayHandler()
     {
@@ -72,12 +79,18 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void initializeClient(ChannelHandlerContext ctx)
     {
         clientCtx = ctx;
+        InetSocketAddress addr = ((SocketChannel)ctx.channel()).localAddress();
+        Util.log("Active channel from client at: " + addr.toString());
+        clientFacingAddress = addr.getAddress();
         initiateServerConnect();
     }
 
     private void initializeServer(ChannelHandlerContext ctx)
     {
         serverCtx = ctx;
+        InetSocketAddress addr = ((SocketChannel)ctx.channel()).localAddress();
+        Util.log("Active channel to server at: " + addr.toString());
+        serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
     }
 
