@@ -1,5 +1,6 @@
 package four.six.ftproxy.server;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 
 import four.six.ftproxy.util.Util;
@@ -29,26 +30,21 @@ public class TestEchoServer extends Thread {
     {
         try {
             Util.log("Attempting to start 'backend' server at port " + port);
+            ChannelFuture f = 
             NettyUtil.getServerChannel(port, new TextRelayChannelInitializer() {
                 @Override
                 public ChannelHandler getProtocolHandler()
                 {
                     return new TestEchoHandler();
                 }
-            }).sync();
+            }).sync().channel().closeFuture();
             running = true;
+            System.out.println("Echo server up and listening at " + port);
+            f.sync();
         } catch (Exception e) {
             e.printStackTrace();
             running = false;
             return;
-        }
-
-        System.out.println("Echo server up and listening at " + port);
-
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            System.out.println("TestEchoServer: interrupted");
         }
     }
 }

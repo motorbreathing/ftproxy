@@ -33,13 +33,6 @@ public class ServerTests
         return p;
     }
 
-    public void stopEchoServer()
-    {
-        assertTrue(echoServer != null && echoServer.isRunning());
-        System.out.println("About to interrupt echo server");
-        echoServer.interrupt();
-    }
-
     @Test
     public void testEchoServer() throws Exception
     {
@@ -58,7 +51,8 @@ public class ServerTests
         String s4 = "hello4";
         c.write(s4 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s4));
+        // Shuts down the echo server
+        c.write("quit" + Util.CRLF);
         c.disconnect();
-        stopEchoServer();
     }
 }
