@@ -6,19 +6,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class TestClientHandler extends SimpleChannelInboundHandler<String> {
-
     @Override
     public void channelActive(ChannelHandlerContext ctx)
       throws Exception {
         System.out.println("TestClientHandler: channelActive");
-        ctx.writeAndFlush("Hello there, FTP Server!\n");
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        System.out.println("TestClientHandler: channelRead");
-        System.out.println(incoming);
+        System.out.println("TestClientHandler: channelRead: " + incoming);
     }
 
     @Override
@@ -30,6 +27,7 @@ public class TestClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
     {
+        System.out.println("TestClientHandler: caught exception");
         cause.printStackTrace();
         ctx.close();
     }

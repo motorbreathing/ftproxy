@@ -14,6 +14,11 @@ public class TestEchoServer extends Thread {
     {
         this.port = port;
     }
+
+    public int getPort()
+    {
+        return port;
+    }
     
     public boolean isRunning()
     {
