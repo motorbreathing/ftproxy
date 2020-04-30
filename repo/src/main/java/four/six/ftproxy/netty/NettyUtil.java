@@ -66,11 +66,18 @@ public class NettyUtil
     public static ChannelFuture
         getServerChannel(ChannelInitializer<? extends Channel> ci) throws Exception
     {
+        return getServerChannel(Util.THIS_PORT, ci).sync();
+    }
+
+    public static ChannelFuture
+        getServerChannel(int port, ChannelInitializer<? extends Channel> ci)
+            throws Exception
+    {
         ServerBootstrap b = getServerBootstrap();
         if (ci != null)
             b.childHandler(ci);
         b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
-        return b.bind(Util.THIS_PORT).sync();
+        return b.bind(port).sync();
     }
 }
