@@ -9,17 +9,22 @@ import four.six.ftproxy.client.TestClient;
 
 public class ServerTests
 {
+    private final int serverPortStart = 7070;
+    private final int serverPortEnd = 8070;
+    private final int serverStartTimeoutMillis = 1000;
+    private final int readTimeoutMillis = 5000;
+
     TestEchoServer echoServer;
 
     public int startEchoServer() throws Exception
     {
-        int p = 7070;
-        while (p < 8070)
+        int p = serverPortStart;
+        while (p < serverPortEnd)
         {
             echoServer = new TestEchoServer();
             echoServer.setPort(p);
             echoServer.start();
-            Thread.sleep(1000);
+            Thread.sleep(serverStartTimeoutMillis);
             if (echoServer.isRunning())
                 break;
             p++;
@@ -36,14 +41,23 @@ public class ServerTests
     }
 
     @Test
-    public void doTest1() throws Exception
+    public void testEchoServer() throws Exception
     {
         startEchoServer();
         TestClient c = new TestClient();
         c.connect(Util.THIS_HOST, echoServer.getPort());
-        String s1 = "hello";
+        String s1 = "hello1";
         c.write(s1 + Util.CRLF);
-        assertTrue(c.readLine(5000).equals(s1));
+        assertTrue(c.readLine(readTimeoutMillis).equals(s1));
+        String s2 = "hello2";
+        c.write(s2 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(s2));
+        String s3 = "hello3";
+        c.write(s3 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(s3));
+        String s4 = "hello4";
+        c.write(s4 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(s4));
         c.disconnect();
         stopEchoServer();
     }

@@ -28,7 +28,6 @@ public class TestClient {
 
     public TestClient()
     {
-        System.out.println("Initializing locks!");
         lp = new LineProvider();
         lpLock = new ReentrantLock();
         lpCond = lpLock.newCondition();

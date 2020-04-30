@@ -5,17 +5,19 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import four.six.ftproxy.util.Util;
+
 public class TestClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelActive(ChannelHandlerContext ctx)
       throws Exception {
-        System.out.println("TestClientHandler: channelActive");
+        Util.log("TestClientHandler: channelActive");
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        System.out.println("TestClientHandler: channelRead: " + incoming);
+        Util.log("TestClientHandler: channelRead: " + incoming);
     }
 
     @Override
@@ -27,8 +29,7 @@ public class TestClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
     {
-        System.out.println("TestClientHandler: caught exception");
-        cause.printStackTrace();
+        Util.log("TestClientHandler: caught exception:\n +" + cause.toString());
         ctx.close();
     }
 }
