@@ -18,16 +18,16 @@ public class Util
     public static final String EMPTYSTRING = "";
     public static final String REGEX_SPLIT_BY_SPACES = "\\s+";
 
-    private static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
-    private static final String DEFAULT_THIS_PORT_STR = "8080";
-    private static final String DEFAULT_REMOTE_HOST_STR = "127.0.0.1";
-    private static final String DEFAULT_REMOTE_PORT_STR = "14646";
-    private static final String DEFAULT_SERVER_BACKLOG_STR = "128";
-    private static final String THIS_HOST_KEY = "host";
-    private static final String THIS_PORT_KEY = "port";
-    private static final String REMOTE_HOST_KEY = "remote-host";
-    private static final String REMOTE_PORT_KEY = "remote-port";
-    private static final String SERVER_BACKLOG_KEY = "server-backlog";
+    public static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
+    public static final String DEFAULT_THIS_PORT_STR = "8080";
+    public static final String DEFAULT_REMOTE_HOST_STR = "127.0.0.1";
+    public static final String DEFAULT_REMOTE_PORT_STR = "14646";
+    public static final String DEFAULT_SERVER_BACKLOG_STR = "128";
+    public static final String THIS_HOST_KEY = "host";
+    public static final String THIS_PORT_KEY = "port";
+    public static final String REMOTE_HOST_KEY = "remote-host";
+    public static final String REMOTE_PORT_KEY = "remote-port";
+    public static final String SERVER_BACKLOG_KEY = "server-backlog";
 
     public static final String THIS_HOST =
         System.getProperty(THIS_HOST_KEY, DEFAULT_THIS_HOST_STR);
