@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.SslHandler;
 
 import four.six.ftproxy.util.Util;
+import four.six.ftproxy.ssl.SSLHandlerProvider;
 
 abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel>
 {
@@ -15,14 +16,21 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
     abstract ChannelHandler getEncoder();
     abstract ChannelHandler getProtocolHandler();
     abstract boolean SSLEnabled();
-    abstract SslHandler getSSLHandler(Channel ch);
+    abstract boolean isServer();
+
+    public SslHandler getSSLHandler(Channel ch)
+    {
+        if (!SSLEnabled())
+            return null;
+
+        return isServer() ?
+               SSLHandlerProvider.getServerSSLHandler(ch) :
+               SSLHandlerProvider.getClientSSLHandler(ch);
+    }
 
     @Override
     public void initChannel(SocketChannel ch) throws Exception
     {
-        if (SSLEnabled())
-            System.out.println("SSL is enabled in initializer");
-
         if (SSLEnabled())
             ch.pipeline().addLast(getSSLHandler(ch),
                                   getDecoder(),

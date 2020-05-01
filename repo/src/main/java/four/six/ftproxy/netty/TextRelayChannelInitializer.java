@@ -58,11 +58,8 @@ public class TextRelayChannelInitializer extends AbstractChannelInitializer
     }
 
     @Override
-    public SslHandler getSSLHandler(Channel ch)
+    public boolean isServer()
     {
-        if (!SSLEnabled())
-            return null;
-
-        return SSLHandlerProvider.getServerSSLHandler(ch);
+        return true;
     }
 }

@@ -48,11 +48,6 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     private void initiateServerConnect()
     {
-        System.out.println("Initiating server-side connect");
-        if (serverSSL)
-            System.out.println("Server-side SSL enabled");
-        else
-            System.out.println("Server-side SSL disabled");
         TextRelayChannelInitializer selfPointer = 
                 serverSSL ?  new TextRelayChannelInitializer() {
                                  @Override
@@ -62,19 +57,16 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                                  }
 
                                  @Override
+                                 public boolean isServer()
+                                 {
+                                     return false;
+                                 }
+
+                                 @Override
                                  public ChannelHandler getProtocolHandler()
                                  {
                                      return getChannelHandler();
                                  }
-
-                                 @Override
-                                 public SslHandler getSSLHandler(Channel ch)
-                                 {
-                                     if (!SSLEnabled())
-                                         return null;
-                                     return SSLHandlerProvider.getClientSSLHandler(ch);
-                                 }
-
                              }
                           :
                              new TextRelayChannelInitializer() {
@@ -116,12 +108,12 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void initializeServer(ChannelHandlerContext ctx)
     {
         serverCtx = ctx;
-        InetSocketAddress addr = ((SocketChannel)ctx.channel()).localAddress();
-        Util.log("Active channel to server at: " + addr.toString());
         InetSocketAddress raddr = ((SocketChannel)ctx.channel()).remoteAddress();
         Util.log("Active channel to remote server at: " + raddr.toString());
+        InetSocketAddress addr = ((SocketChannel)ctx.channel()).localAddress();
         serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
+        // Flush any data that has already arrived from client-side
         if (clientData.getStashedString() != null)
             flushToServer();
     }

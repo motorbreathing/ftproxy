@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import four.six.ftproxy.ssl.SSLHandlerProvider;
+import four.six.ftproxy.util.Util;
 
 public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
 
@@ -13,14 +14,14 @@ public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception
     {
-        System.out.println("TestEchoHandler: channel active");
+        Util.log("TestEchoHandler: channel active");
         this.ctx = ctx;
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
     {
-        System.out.println("TestEchoHandler: read: " + incoming);
+        Util.log("TestEchoHandler: read: " + incoming);
         if (incoming.equalsIgnoreCase("quit"))
             ctx.close();
         else
