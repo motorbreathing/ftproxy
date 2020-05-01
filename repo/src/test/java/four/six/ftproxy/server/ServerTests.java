@@ -91,15 +91,15 @@ public class ServerTests
         c.disconnect();
     }
 
-    @Test
-    public void testProxyServer() throws Exception
+    public void testProxySSLScenarios(boolean cf, boolean pf, boolean sf) throws Exception
     {
-        int echoServerPort = startEchoServer(true);
+        int echoServerPort = startEchoServer(sf);
         System.setProperty(Util.REMOTE_PORT_KEY, Integer.toString(echoServerPort));
-        int proxyServerPort = startProxyServer(true);
-        proxyServer.enableServerSSL();
+        int proxyServerPort = startProxyServer(pf);
+        if (sf)
+            proxyServer.enableServerSSL();
         TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, proxyServerPort, true);
+        c.connect(Util.THIS_HOST, proxyServerPort, cf);
         String s1 = "hello1";
         c.write(s1 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s1));
@@ -115,5 +115,13 @@ public class ServerTests
         stopEchoServer();
         stopProxyServer();
         c.disconnect();
+    }
+
+    @Test
+    public void testProxyServer() throws Exception
+    {
+        testProxySSLScenarios(true, true, true);
+        testProxySSLScenarios(false, false, true);
+        testProxySSLScenarios(true, true, false);
     }
 }

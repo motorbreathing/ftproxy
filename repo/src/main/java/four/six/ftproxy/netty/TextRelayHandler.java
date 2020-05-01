@@ -122,6 +122,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         Util.log("Active channel to remote server at: " + raddr.toString());
         serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
+        if (clientData.getStashedString() != null)
+            flushToServer();
     }
 
     // Process a new incoming client connection
