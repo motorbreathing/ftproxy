@@ -19,12 +19,14 @@ public class ServerTests
     TestEchoServer echoServer;
     TestProxyServer proxyServer;
 
-    public int startEchoServer() throws Exception
+    public int startEchoServer(boolean ssl) throws Exception
     {
         int p = echoServerPortStart;
         while (p < echoServerPortEnd)
         {
             echoServer = new TestEchoServer();
+            if (ssl)
+                echoServer.enableSSL();
             echoServer.setPort(p);
             echoServer.start();
             Thread.sleep(serverStartTimeoutMillis);
@@ -38,16 +40,18 @@ public class ServerTests
 
     public void stopEchoServer()
     {
-        if (echoServer != null)
+        if (echoServer != null && echoServer.isRunning())
             echoServer.interrupt();
     }
 
-    public int startProxyServer() throws Exception
+    public int startProxyServer(boolean ssl) throws Exception
     {
         int p = proxyServerPortStart;
         while (p < proxyServerPortEnd)
         {
             proxyServer = new TestProxyServer();
+            if (ssl)
+                proxyServer.enableSSL();
             proxyServer.setPort(p);
             proxyServer.start();
             Thread.sleep(serverStartTimeoutMillis);
@@ -61,16 +65,16 @@ public class ServerTests
 
     public void stopProxyServer()
     {
-        if (proxyServer != null)
+        if (proxyServer != null && proxyServer.isRunning())
             proxyServer.interrupt();
     }
 
     @Test
     public void testEchoServer() throws Exception
     {
-        startEchoServer();
+        startEchoServer(true);
         TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, echoServer.getPort());
+        c.connect(Util.THIS_HOST, echoServer.getPort(), true);
         String s1 = "hello1";
         c.write(s1 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s1));
@@ -83,8 +87,6 @@ public class ServerTests
         String s4 = "hello4";
         c.write(s4 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s4));
-        // Shuts down the echo server
-        c.write("quit" + Util.CRLF);
         stopEchoServer();
         c.disconnect();
     }
@@ -92,11 +94,12 @@ public class ServerTests
     @Test
     public void testProxyServer() throws Exception
     {
-        int echoServerPort = startEchoServer();
+        int echoServerPort = startEchoServer(true);
         System.setProperty(Util.REMOTE_PORT_KEY, Integer.toString(echoServerPort));
-        int proxyServerPort = startProxyServer();
+        int proxyServerPort = startProxyServer(true);
+        proxyServer.enableServerSSL();
         TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, proxyServer.getPort());
+        c.connect(Util.THIS_HOST, proxyServerPort, true);
         String s1 = "hello1";
         c.write(s1 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s1));
@@ -109,8 +112,6 @@ public class ServerTests
         String s4 = "hello4";
         c.write(s4 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s4));
-        // Shuts down the echo server
-        c.write("quit" + Util.CRLF);
         stopEchoServer();
         stopProxyServer();
         c.disconnect();

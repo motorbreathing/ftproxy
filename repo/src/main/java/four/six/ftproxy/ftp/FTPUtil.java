@@ -13,6 +13,12 @@ public class FTPUtil
     public static ChannelFuture
         getFTProxyServerChannel() throws Exception
     {
-        return NettyUtil.getServerChannel(new FTPChannelInitializer());
+        return getFTProxyServerChannel(false);
+    }
+
+    public static ChannelFuture
+        getFTProxyServerChannel(boolean sslStatus) throws Exception
+    {
+        return NettyUtil.getServerChannel(new FTPChannelInitializer(sslStatus));
     }
 }

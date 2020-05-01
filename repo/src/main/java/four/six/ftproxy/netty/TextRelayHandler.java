@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.ssl.SslHandler;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -29,13 +30,11 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private ChannelHandlerContext serverCtx;
     private ChannelHandlerContext clientCtx;
 
-    // Individual SSL statuses
-    boolean clientSSLEnabled;
-    boolean serverSSLEnabled;
-
     // Individual addresses that face client/server
-    InetAddress clientFacingAddress;
-    InetAddress serverFacingAddress;
+    private InetAddress clientFacingAddress;
+    private InetAddress serverFacingAddress;
+
+    private boolean serverSSL;
 
     public TextRelayHandler()
     {
@@ -49,14 +48,43 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     private void initiateServerConnect()
     {
+        System.out.println("Initiating server-side connect");
+        if (serverSSL)
+            System.out.println("Server-side SSL enabled");
+        else
+            System.out.println("Server-side SSL disabled");
         TextRelayChannelInitializer selfPointer = 
-                new TextRelayChannelInitializer() {
-                    @Override
-                    public ChannelHandler getProtocolHandler()
-                    {
-                        return getChannelHandler();
-                    }
-                };
+                serverSSL ?  new TextRelayChannelInitializer() {
+                                 @Override
+                                 public boolean SSLEnabled()
+                                 {
+                                     return true;
+                                 }
+
+                                 @Override
+                                 public ChannelHandler getProtocolHandler()
+                                 {
+                                     return getChannelHandler();
+                                 }
+
+                                 @Override
+                                 public SslHandler getSSLHandler(Channel ch)
+                                 {
+                                     if (!SSLEnabled())
+                                         return null;
+                                     return SSLHandlerProvider.getClientSSLHandler(ch);
+                                 }
+
+                             }
+                          :
+                             new TextRelayChannelInitializer() {
+                                 @Override
+                                 public ChannelHandler getProtocolHandler()
+                                 {
+                                     return getChannelHandler();
+                                 }
+                             };
+
         ChannelFuture cf = NettyUtil.getChannelToRemoteHost(selfPointer);
 
         ChannelFutureListener cfl =
@@ -90,6 +118,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         serverCtx = ctx;
         InetSocketAddress addr = ((SocketChannel)ctx.channel()).localAddress();
         Util.log("Active channel to server at: " + addr.toString());
+        InetSocketAddress raddr = ((SocketChannel)ctx.channel()).remoteAddress();
+        Util.log("Active channel to remote server at: " + raddr.toString());
         serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
     }
@@ -135,16 +165,47 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
+    public boolean clientSSLEnabled()
+    {
+        if (clientCtx == null)
+            return false;
+        ChannelHandler first = clientCtx.pipeline().first();
+        return first instanceof SslHandler;
+    }
+
+    public boolean serverSSLEnabled()
+    {
+        if (serverCtx == null)
+            return false;
+        ChannelHandler first = serverCtx.pipeline().first();
+        return first instanceof SslHandler;
+    }
+
     public void enableClientSSL()
     {
-        SocketChannel ch = (SocketChannel)clientCtx.channel();
-        clientCtx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
+        if (clientCtx == null)
+            return; // This should not happen
+
+        if (clientSSLEnabled())
+            return;
+
+        clientCtx.pipeline()
+                 .addFirst(SSLHandlerProvider.getServerSSLHandler(clientCtx.channel()));
     }
 
     public void enableServerSSL()
     {
-        SocketChannel ch = (SocketChannel)serverCtx.channel();
-        serverCtx.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
+        Util.log("Enabling Server-side SSL");
+        serverSSL = true;
+
+        if (serverCtx == null)
+            return;
+
+        if (serverSSLEnabled())
+            return;
+
+        serverCtx.pipeline()
+                 .addFirst(SSLHandlerProvider.getClientSSLHandler(serverCtx.channel()));
     }
 
     public void enableSSL(Object origin)
@@ -210,6 +271,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     public void writeToServer(String line)
     {
+        Util.log("[wrote to server] " + line);
         serverCtx.writeAndFlush(line);
     }
 
@@ -218,7 +280,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         line = processCommand(line);
         if (line != null && line.length() > 0)
         {
-            Util.log("[processed line] " + line);
+            Util.log("[processed command] " + line);
             writeToServer(line);
         }
     }

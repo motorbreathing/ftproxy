@@ -9,9 +9,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.SocketChannel;
 
 import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.StringEncoder;
@@ -19,6 +19,7 @@ import four.six.ftproxy.netty.StringDecoder;
 import four.six.ftproxy.netty.TestClientHandler;
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
+import four.six.ftproxy.ssl.SSLHandlerProvider;
 
 public class TestClient {
     private Channel ch;
@@ -58,20 +59,35 @@ public class TestClient {
         return null;
     }
 
-    private ChannelInitializer<? extends Channel> getChannelInitializer()
+    private ChannelInitializer<? extends Channel> getChannelInitializer(boolean ssl)
     {
+        TestClientHandler tch =
+            new TestClientHandler() {
+                    @Override
+                    public void channelRead0(ChannelHandlerContext ctx,
+                                             String incoming) throws Exception
+                    {
+                        addString(incoming);
+                    }
+            };
+
+        if (ssl) // SSL enabled
+        return new ChannelInitializer<SocketChannel>() {
+                       @Override
+                       public void initChannel(SocketChannel ch) throws Exception {
+                           ch.pipeline().addLast(SSLHandlerProvider.getClientSSLHandler(ch),
+                                                 new StringDecoder(),
+                                                 new StringEncoder(),
+                                                 tch);
+                       }
+                   };
+        else // SSL disabled
         return new ChannelInitializer<SocketChannel>() {
                        @Override
                        public void initChannel(SocketChannel ch) throws Exception {
                            ch.pipeline().addLast(new StringDecoder(),
                                                  new StringEncoder(),
-                                                 new TestClientHandler() {
-                                                     @Override
-                                                     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
-                                                     {
-                                                         addString(incoming);
-                                                     }
-                                                 });
+                                                 tch);
                        }
                    };
     }
@@ -81,18 +97,35 @@ public class TestClient {
          ch.writeAndFlush(line).sync();
     }
 
-    public void connect(String host, int port) throws Exception
+    public void connect(String host, int port, boolean ssl) throws Exception
     {
         try {
-            ch = NettyUtil.getChannelToHost(host, port, getChannelInitializer()).sync().channel();
+            Util.log("Client: attempting to connect to " + host + " at port " + port);
+            ch = NettyUtil.getChannelToHost(host, port, getChannelInitializer(ssl))
+                          .sync().channel();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
 
+    public void connect(String host, int port) throws Exception
+    {
+        connect(host, port, false);
+    }
+
     public void disconnect() throws Exception
     {
+        Util.log("Client: disconnecting");
         ch.close();
+    }
+
+    public void enableSSL()
+    {
+        if (ch != null)
+            ch.pipeline()
+              .addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
+        else
+            Util.log("Warning: enableSSL() failed for client");
     }
 }

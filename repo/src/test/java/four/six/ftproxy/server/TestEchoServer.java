@@ -10,6 +10,7 @@ import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class TestEchoServer extends AbstractTestServer {
     private final static String myName = "Test Echo Server";
+    private final TestEchoHandler handler = new TestEchoHandler();
 
     public TestEchoServer()
     {
@@ -19,13 +20,27 @@ public class TestEchoServer extends AbstractTestServer {
     @Override
     protected ChannelInitializer<? extends Channel> getTestServerChannelInitializer()
     {
-        return new TextRelayChannelInitializer() {
-                       @Override
-                       public ChannelHandler getProtocolHandler()
-                       {
-                           return new TestEchoHandler();
-                       }
-                    };
+        if (sslStatus)
+            return new TextRelayChannelInitializer() {
+                        @Override
+                        public boolean SSLEnabled()
+                        {
+                            return true;
+                        }
 
+                        @Override
+                        public ChannelHandler getProtocolHandler()
+                        {
+                            return handler;
+                        }
+                   };
+        else
+            return new TextRelayChannelInitializer() {
+                        @Override
+                        public ChannelHandler getProtocolHandler()
+                        {
+                            return handler;
+                        }
+                   };
     }
 }

@@ -5,7 +5,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.Channel;
 
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLException;
@@ -32,14 +32,14 @@ public class SSLHandlerProvider {
         }
     }
 
-    public static SslHandler getServerSSLHandler(SocketChannel ch){
+    public static SslHandler getServerSSLHandler(Channel ch){
         if (serverSslContext == null)
             return null;
 
         return serverSslContext.newHandler(ch.alloc());
     }
 
-    public static SslHandler getClientSSLHandler(SocketChannel ch){
+    public static SslHandler getClientSSLHandler(Channel ch){
         if (clientSslContext == null)
             return null;
 
