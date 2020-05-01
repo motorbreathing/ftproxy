@@ -36,6 +36,12 @@ public class ServerTests
         return p;
     }
 
+    public void stopEchoServer()
+    {
+        if (echoServer != null)
+            echoServer.interrupt();
+    }
+
     public int startProxyServer() throws Exception
     {
         int p = proxyServerPortStart;
@@ -51,6 +57,12 @@ public class ServerTests
         }
         assertTrue(proxyServer.isRunning());
         return p;
+    }
+
+    public void stopProxyServer()
+    {
+        if (proxyServer != null)
+            proxyServer.interrupt();
     }
 
     @Test
@@ -73,6 +85,7 @@ public class ServerTests
         assertTrue(c.readLine(readTimeoutMillis).equals(s4));
         // Shuts down the echo server
         c.write("quit" + Util.CRLF);
+        stopEchoServer();
         c.disconnect();
     }
 
@@ -98,6 +111,8 @@ public class ServerTests
         assertTrue(c.readLine(readTimeoutMillis).equals(s4));
         // Shuts down the echo server
         c.write("quit" + Util.CRLF);
+        stopEchoServer();
+        stopProxyServer();
         c.disconnect();
     }
 }

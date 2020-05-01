@@ -1,7 +1,6 @@
 package four.six.ftproxy.server;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 
@@ -33,23 +32,27 @@ abstract class TestServer extends Thread {
         this.name = name;
     }
 
-    protected abstract ChannelInitializer<? extends Channel> getTestServerChannelInitializer();
+    protected abstract
+        ChannelInitializer<? extends Channel> getTestServerChannelInitializer();
 
     public void run()
     {
+        Channel ch = null;
         try {
             Util.log(name + ": attempting to start at port " + port);
-            ChannelFuture f = 
-            NettyUtil.getServerChannel(port, getTestServerChannelInitializer())
-                     .sync().channel().closeFuture();
+            ch = NettyUtil.getServerChannel(port, getTestServerChannelInitializer())
+                     .sync().channel();
             running = true;
             Util.log(name + ": up and running at port " + port);
-            f.sync();
+            ch.closeFuture().sync();
+        } catch (InterruptedException e) {
+            Util.log(name + " at port " + port + ": interrupted; shutting down");
+            ch.close();
         } catch (Exception e) {
             Util.log(name + ": failed to bind at port " + port);
             e.printStackTrace();
-            running = false;
-            return;
         }
+        running = false;
+        return;
     }
 }
