@@ -46,6 +46,16 @@ public class Util
     public static final int dataPortMin = 1025;
     public static final int dataPortMax = 65535;
 
+    public static String getRemoteHost()
+    {
+        return System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
+    }
+
+    public static int getRemotePort()
+    {
+        return Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
+    }
+
     static {
         logger.setLevel(Level.FINE);
         logger.setUseParentHandlers(false);

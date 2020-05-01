@@ -43,13 +43,7 @@ public class NettyUtil
     public static ChannelFuture
         getChannelToRemoteHost(ChannelInitializer<? extends Channel> ci)
     {
-        return getChannelToHost(Util.REMOTE_HOST, Util.REMOTE_PORT, ci);
-    }
-
-    public static ChannelFuture
-        getChannelToProxy(ChannelInitializer<? extends Channel> ci)
-    {
-        return getChannelToHost(Util.THIS_HOST, Util.THIS_PORT, ci);
+        return getChannelToHost(Util.getRemoteHost(), Util.getRemotePort(), ci);
     }
 
     public static ChannelFuture

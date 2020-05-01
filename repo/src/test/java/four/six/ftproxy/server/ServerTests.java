@@ -96,7 +96,7 @@ public class ServerTests
         System.setProperty(Util.REMOTE_PORT_KEY, Integer.toString(echoServerPort));
         int proxyServerPort = startProxyServer();
         TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, echoServer.getPort());
+        c.connect(Util.THIS_HOST, proxyServer.getPort());
         String s1 = "hello1";
         c.write(s1 + Util.CRLF);
         assertTrue(c.readLine(readTimeoutMillis).equals(s1));
