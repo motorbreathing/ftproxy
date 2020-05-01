@@ -8,7 +8,7 @@ import four.six.ftproxy.util.Util;
 import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
-public class TestEchoServer extends TestServer {
+public class TestEchoServer extends AbstractTestServer {
     private final static String myName = "Test Echo Server";
 
     public TestEchoServer()

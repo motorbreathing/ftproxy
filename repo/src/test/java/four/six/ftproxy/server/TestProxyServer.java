@@ -5,7 +5,7 @@ import io.netty.channel.ChannelInitializer;
 
 import four.six.ftproxy.ftp.FTPChannelInitializer;
 
-public class TestProxyServer extends TestServer {
+public class TestProxyServer extends AbstractTestServer {
 
     private final static String myName = "Test Proxy Server";
     public TestProxyServer()

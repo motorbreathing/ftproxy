@@ -7,7 +7,7 @@ import io.netty.channel.ChannelInitializer;
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.netty.NettyUtil;
 
-abstract class TestServer extends Thread {
+abstract class AbstractTestServer extends Thread {
     private int port = 6666;
     private volatile boolean running = false;
     private String name = "Test Server";
