@@ -16,22 +16,6 @@ public class TextRelayChannelInitializer extends AbstractChannelInitializer
 {
     private static final StringDecoder DECODER = new StringDecoder();
     private static final StringEncoder ENCODER = new StringEncoder();
-    private boolean sslStatus;
-
-    public TextRelayChannelInitializer()
-    {
-        init(false);
-    }
-
-    public TextRelayChannelInitializer(boolean sslStatus)
-    {
-        init(sslStatus);
-    }
-
-    private void init(boolean sslStatus)
-    {
-        this.sslStatus = sslStatus;
-    }
 
     @Override
     public ChannelHandler getDecoder()
@@ -49,18 +33,5 @@ public class TextRelayChannelInitializer extends AbstractChannelInitializer
     public ChannelHandler getProtocolHandler()
     {
         return new TextRelayHandler();
-    }
-
-    @Override
-    public boolean SSLEnabled()
-    {
-        return sslStatus;
-    }
-
-    @Override
-    public boolean isServer()
-    {
-        // Defaults to server mode
-        return true;
     }
 }

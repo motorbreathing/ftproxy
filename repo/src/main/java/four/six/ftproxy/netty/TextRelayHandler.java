@@ -49,6 +49,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void initiateServerConnect()
     {
         TextRelayChannelInitializer selfPointer = 
+            /*
                 serverSSL ?  new TextRelayChannelInitializer() {
                                  @Override
                                  public boolean SSLEnabled()
@@ -74,6 +75,29 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                                  public ChannelHandler getProtocolHandler()
                                  {
                                      return getChannelHandler();
+                                 }
+                             };
+                             */
+
+                serverSSL ?  new TextRelayChannelInitializer() {
+                                 @Override
+                                 public ChannelHandler getSSLHandler(Channel ch)
+                                 {
+                                     return SSLHandlerProvider.getClientSSLHandler(ch);
+                                 }
+
+                                 @Override
+                                 public ChannelHandler getProtocolHandler()
+                                 {
+                                     return TextRelayHandler.this;
+                                 }
+                             }
+                          :
+                             new TextRelayChannelInitializer() {
+                                 @Override
+                                 public ChannelHandler getProtocolHandler()
+                                 {
+                                     return TextRelayHandler.this;
                                  }
                              };
 

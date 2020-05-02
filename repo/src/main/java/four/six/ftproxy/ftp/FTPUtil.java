@@ -19,6 +19,6 @@ public class FTPUtil
     public static ChannelFuture
         getFTProxyServerChannel(boolean sslStatus) throws Exception
     {
-        return NettyUtil.getServerChannel(new FTPChannelInitializer(sslStatus));
+        return NettyUtil.getServerChannel(new FTProxyServerChannelInitializer(sslStatus));
     }
 }

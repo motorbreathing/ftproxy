@@ -1,26 +1,38 @@
 package four.six.ftproxy.ftp;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 
+import four.six.ftproxy.ssl.SSLHandlerProvider;
 import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
-public class FTPChannelInitializer extends TextRelayChannelInitializer
+public class FTProxyServerChannelInitializer extends TextRelayChannelInitializer
 {
     FTPRelayHandler handler = new FTPRelayHandler();
+    boolean sslEnabled;
 
-    public FTPChannelInitializer()
+    public FTProxyServerChannelInitializer()
     {
-        super(false);
+        sslEnabled = false;
     }
 
-    public FTPChannelInitializer(boolean sslStatus)
+    public FTProxyServerChannelInitializer(boolean sslEnabled)
     {
-        super(sslStatus);
+        this.sslEnabled = sslEnabled;
     }
 
     @Override
     public ChannelHandler getProtocolHandler()
     {
         return handler;
+    }
+
+    @Override
+    public ChannelHandler getSSLHandler(Channel ch)
+    {
+        if (sslEnabled)
+            return SSLHandlerProvider.getServerSSLHandler(ch);
+
+        return null;
     }
 }

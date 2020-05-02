@@ -6,6 +6,7 @@ import io.netty.channel.ChannelInitializer;
 
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.netty.NettyUtil;
+import four.six.ftproxy.ssl.SSLHandlerProvider;
 import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class TestEchoServer extends AbstractTestServer {
@@ -23,9 +24,9 @@ public class TestEchoServer extends AbstractTestServer {
         if (sslStatus)
             return new TextRelayChannelInitializer() {
                         @Override
-                        public boolean SSLEnabled()
+                        public ChannelHandler getSSLHandler(Channel ch)
                         {
-                            return true;
+                            return SSLHandlerProvider.getServerSSLHandler(ch);
                         }
 
                         @Override
@@ -47,7 +48,10 @@ public class TestEchoServer extends AbstractTestServer {
     void enableExplicitSSL()
     {
         if (handler == null)
+        {
+            Util.log("Warning: TextEchoServer: handling missing, can't enable SSL");
             return;
+        }
         handler.enableExplicitSSL();
     }
 }

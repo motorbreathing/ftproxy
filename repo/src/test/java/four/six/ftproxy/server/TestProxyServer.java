@@ -4,13 +4,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 
-import four.six.ftproxy.ftp.FTPChannelInitializer;
+import four.six.ftproxy.ftp.FTProxyServerChannelInitializer;
 import four.six.ftproxy.ftp.FTPRelayHandler;
 
 public class TestProxyServer extends AbstractTestServer {
 
     private final static String myName = "Test Proxy Server";
-    private FTPChannelInitializer ftpChannelInitializer = null;
+    private FTProxyServerChannelInitializer ftpServerChannelInitializer = null;
     private FTPRelayHandler handler = null;
     
     public TestProxyServer()
@@ -22,21 +22,21 @@ public class TestProxyServer extends AbstractTestServer {
     protected ChannelInitializer<? extends Channel> getTestServerChannelInitializer()
     {
         // If we have an already-setup ftp channel initializer...
-        if (ftpChannelInitializer != null)
-            return ftpChannelInitializer;
+        if (ftpServerChannelInitializer != null)
+            return ftpServerChannelInitializer;
 
-        ftpChannelInitializer = new FTPChannelInitializer(sslStatus);
-        handler = (FTPRelayHandler)ftpChannelInitializer.getProtocolHandler();
-        return ftpChannelInitializer;
+        ftpServerChannelInitializer = new FTProxyServerChannelInitializer(sslStatus);
+        handler = (FTPRelayHandler)ftpServerChannelInitializer.getProtocolHandler();
+        return ftpServerChannelInitializer;
     }
 
     private FTPRelayHandler getHandler()
     {
         if (handler != null)
             return handler;
-        if (ftpChannelInitializer == null)
-            ftpChannelInitializer = new FTPChannelInitializer(sslStatus);
-        return (FTPRelayHandler)ftpChannelInitializer.getProtocolHandler();
+        if (ftpServerChannelInitializer == null)
+            ftpServerChannelInitializer = new FTProxyServerChannelInitializer(sslStatus);
+        return (FTPRelayHandler)ftpServerChannelInitializer.getProtocolHandler();
     }
 
     public void enableClientSSL()

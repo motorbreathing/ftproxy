@@ -1,5 +1,7 @@
 package four.six.ftproxy.netty;
 
+import java.util.ArrayList;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
@@ -12,34 +14,35 @@ import four.six.ftproxy.ssl.SSLHandlerProvider;
 
 abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel>
 {
+    // Child classes can provide all these, if so inclined
     abstract ChannelHandler getDecoder();
     abstract ChannelHandler getEncoder();
     abstract ChannelHandler getProtocolHandler();
 
-    abstract boolean SSLEnabled();
-    abstract boolean isServer();
-
-    public SslHandler getSSLHandler(Channel ch)
+    // Default: no SSL
+    public ChannelHandler getSSLHandler(Channel ch)
     {
-        if (!SSLEnabled())
-            return null;
-
-        return isServer() ? SSLHandlerProvider.getServerSSLHandler(ch)
-                          : SSLHandlerProvider.getClientSSLHandler(ch);
+        return null;
     }
 
     @Override
     public void initChannel(SocketChannel ch) throws Exception
     {
-        if (SSLEnabled())
-            ch.pipeline().addLast(getSSLHandler(ch),
-                                  getDecoder(),
-                                  getEncoder(),
-                                  getProtocolHandler());
-        else
-            ch.pipeline().addLast(getDecoder(),
-                                  getEncoder(),
-                                  getProtocolHandler());
+        ChannelHandler sslHandler = getSSLHandler(ch);
+        if (sslHandler != null)
+            ch.pipeline().addFirst(sslHandler);
+
+        ChannelHandler decoder = getDecoder();
+        if (decoder != null);
+            ch.pipeline().addLast(decoder);
+
+        ChannelHandler encoder = getEncoder();
+        if (encoder != null);
+            ch.pipeline().addLast(encoder);
+
+        ChannelHandler protocolHandler = getProtocolHandler();
+        if (protocolHandler != null)
+            ch.pipeline().addLast(protocolHandler);
     }
 
     @Override
