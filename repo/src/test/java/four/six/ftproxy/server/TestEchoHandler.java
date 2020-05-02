@@ -33,5 +33,10 @@ public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
     {
         ctx.flush();
     }
+
+    public void enableExplicitSSL()
+    {
+        ctx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ctx.channel()));
+    }
 }
 

@@ -43,4 +43,11 @@ public class TestEchoServer extends AbstractTestServer {
                         }
                    };
     }
+
+    void enableExplicitSSL()
+    {
+        if (handler == null)
+            return;
+        handler.enableExplicitSSL();
+    }
 }

@@ -60,6 +60,7 @@ public class TextRelayChannelInitializer extends AbstractChannelInitializer
     @Override
     public boolean isServer()
     {
+        // Defaults to server mode
         return true;
     }
 }

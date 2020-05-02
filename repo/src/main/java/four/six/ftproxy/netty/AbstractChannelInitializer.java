@@ -15,6 +15,7 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
     abstract ChannelHandler getDecoder();
     abstract ChannelHandler getEncoder();
     abstract ChannelHandler getProtocolHandler();
+
     abstract boolean SSLEnabled();
     abstract boolean isServer();
 
@@ -23,9 +24,8 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
         if (!SSLEnabled())
             return null;
 
-        return isServer() ?
-               SSLHandlerProvider.getServerSSLHandler(ch) :
-               SSLHandlerProvider.getClientSSLHandler(ch);
+        return isServer() ? SSLHandlerProvider.getServerSSLHandler(ch)
+                          : SSLHandlerProvider.getClientSSLHandler(ch);
     }
 
     @Override
