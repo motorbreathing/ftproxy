@@ -31,8 +31,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private ChannelHandlerContext clientCtx;
 
     // Individual addresses that face client/server
-    private InetAddress clientFacingAddress;
-    private InetAddress serverFacingAddress;
+    protected InetAddress clientFacingAddress;
+    protected InetAddress serverFacingAddress;
 
     private boolean serverSSL;
 
@@ -41,44 +41,9 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         clientData = new LineProvider();
     }
 
-    public ChannelHandler getChannelHandler()
-    {
-        return this;
-    }
-
     private void initiateServerConnect()
     {
         TextRelayChannelInitializer selfPointer = 
-            /*
-                serverSSL ?  new TextRelayChannelInitializer() {
-                                 @Override
-                                 public boolean SSLEnabled()
-                                 {
-                                     return true;
-                                 }
-
-                                 @Override
-                                 public boolean isServer()
-                                 {
-                                     return false;
-                                 }
-
-                                 @Override
-                                 public ChannelHandler getProtocolHandler()
-                                 {
-                                     return getChannelHandler();
-                                 }
-                             }
-                          :
-                             new TextRelayChannelInitializer() {
-                                 @Override
-                                 public ChannelHandler getProtocolHandler()
-                                 {
-                                     return getChannelHandler();
-                                 }
-                             };
-                             */
-
                 serverSSL ?  new TextRelayChannelInitializer() {
                                  @Override
                                  public ChannelHandler getSSLHandler(Channel ch)
@@ -118,6 +83,13 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                 }
             };
         cf.addListener(cfl);
+    }
+
+    // The incoming value is a socket address that the client is listening
+    // at.
+    protected void relayFromClient(InetSocketAddress saddr)
+    {
+
     }
 
     private void initializeClient(ChannelHandlerContext ctx)
@@ -175,9 +147,13 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void removePeerHandler(ChannelHandlerContext ctx)
     {
         if (ctx == serverCtx) {
-            clientCtx.close();
+            if (clientCtx != null)
+                clientCtx.close();
+            serverCtx = null;
         } else if (ctx == clientCtx) {
-            serverCtx.close();
+            if (serverCtx != null)
+                serverCtx.close();
+            clientCtx = null;
         } else {
             throw new IllegalStateException("close: unknown channel handler context");
         }

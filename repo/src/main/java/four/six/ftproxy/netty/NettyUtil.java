@@ -9,6 +9,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -58,9 +61,20 @@ public class NettyUtil
     }
 
     public static ChannelFuture
+        getChannelToAddress(InetSocketAddress address,
+                            ChannelInitializer<? extends Channel> ci)
+    {
+        Bootstrap b = getClientBootstrap();
+        b.option(ChannelOption.SO_KEEPALIVE, true);
+        if (ci != null)
+            b.handler(ci);
+        return b.connect(address);
+    }
+
+    public static ChannelFuture
         getServerChannel(ChannelInitializer<? extends Channel> ci) throws Exception
     {
-        return getServerChannel(Util.THIS_PORT, ci).sync();
+        return getServerChannel(Util.THIS_PORT, ci);
     }
 
     public static ChannelFuture
@@ -72,6 +86,28 @@ public class NettyUtil
             b.childHandler(ci);
         b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
-        return b.bind(port).sync();
+        return b.bind(port);
+    }
+
+    public static ChannelFuture
+        getListenerChannel(InetAddress addr, ChannelInitializer<? extends Channel> ci)
+    {
+        ServerBootstrap b = getServerBootstrap();
+        if (ci != null)
+            b.childHandler(ci);
+        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        for (int p = Util.dataPortMin; p <= Util.dataPortMax; p++)
+        {
+            try {
+                // XXX : should be async?
+                return b.bind(addr, p).sync();
+            } catch (Exception e) {
+                Util.log("Listener bind: port " + p + " not available, retrying next");
+                continue;
+            }
+        }
+        Util.log("Listener: failed to bind (in range " + Util.dataPortMin + "-" + Util.dataPortMax + ")");
+        return null;
     }
 }

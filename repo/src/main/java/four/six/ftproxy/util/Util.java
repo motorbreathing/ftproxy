@@ -15,8 +15,10 @@ public class Util
     public static final char CR = '\r';
     public static final String CRLF = "\r\n";
     public static final String SPACE = " ";
+    public static final String COMMA = ",";
     public static final String EMPTYSTRING = "";
     public static final String REGEX_SPLIT_BY_SPACES = "\\s+";
+    public static final String REGEX_SPLIT_BY_COMMA = "\\s*,\\s*";
 
     public static final String DEFAULT_THIS_HOST_STR = "127.0.0.1";
     public static final String DEFAULT_THIS_PORT_STR = "8080";
@@ -45,6 +47,9 @@ public class Util
 
     public static final int dataPortMin = 1025;
     public static final int dataPortMax = 65535;
+
+    public static final int IPV4_ADDRESS_LENGTH = 4;
+    public static final int IPV6_ADDRESS_LENGTH = 16;
 
     public static String getRemoteHost()
     {
