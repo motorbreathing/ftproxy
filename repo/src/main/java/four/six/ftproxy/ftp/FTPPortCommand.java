@@ -15,10 +15,12 @@ public class FTPPortCommand extends FTPDataTransferCommand
     public FTPPortCommand(String args[], FTPRelayHandler handler)
     {
         super(args, handler);
+        Util.log("FTP PORT command");
     }
 
     public static String formatCommand(byte[] addr, int port)
     {
+        Util.log("FTPPortCommand: format: port is " + port);
         String c = COMMAND_STR;
         c += Util.SPACE;
         c += addr[0];
@@ -32,12 +34,14 @@ public class FTPPortCommand extends FTPDataTransferCommand
         c += Integer.toString(port >> 8);
         c += Util.COMMA;
         c += Integer.toString(port & 0x000000ff);
-        return c;
+        Util.log("FTP Port command: formatted: " + c);
+        return c + Util.CRLF;
     }
 
     protected InetSocketAddress processPortArgs()
     {
         String c = String.join(Util.SPACE, args);
+        Util.log("About to process FTP PORT Command: " + c);
         c = c.substring(c.indexOf(Util.SPACE) + 1);
         String[] digits = c.split(Util.REGEX_SPLIT_BY_COMMA);
         if (digits.length != 6)
@@ -52,8 +56,8 @@ public class FTPPortCommand extends FTPDataTransferCommand
         addr[2] = Byte.parseByte(digits[2]);
         addr[3] = Byte.parseByte(digits[3]);
 
-        int port = Integer.parseInt(args[5]);
-        port |= (Integer.parseInt(args[4]) << 8);
+        int port = Integer.parseInt(digits[5]);
+        port |= (Integer.parseInt(digits[4]) << 8);
 
         try {
             return new InetSocketAddress(InetAddress.getByAddress(addr), port);
@@ -68,7 +72,7 @@ public class FTPPortCommand extends FTPDataTransferCommand
     {
         // We don't issue a response to PORT commands, and instead,
         // get down to the nitty gritties of setting up a data relay
-        handler.relayFromClient(processPortArgs());
+        handler.relayToClient(processPortArgs());
         return null;
     }
 }
