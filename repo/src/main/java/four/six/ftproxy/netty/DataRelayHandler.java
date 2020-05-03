@@ -23,49 +23,12 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     private ChannelHandlerContext oneCtx = null;
     private ChannelHandlerContext otherCtx = null;
-    private InetSocketAddress otherAddress;
 
-    public DataRelayHandler(InetSocketAddress otherAddress)
-    {
-        this.otherAddress = otherAddress;
-    }
-
-    protected void connectToOther() throws Exception
-    {
-         DataRelayChannelInitializer ci =
-             new DataRelayChannelInitializer() {
-                 @Override
-                 public ChannelHandler getProtocolHandler()
-                 {
-                     return DataRelayHandler.this;
-                 }
-             };
-
-        ChannelFuture cf = NettyUtil.getChannelToAddress(otherAddress, ci);
-
-        ChannelFutureListener cfl =
-            new ChannelFutureListener() {
-                public void operationComplete(ChannelFuture f)
-                {
-                    if (f.isSuccess())
-                    {
-                        Util.log("DATA: other channel connected");
-                    } else {
-                        Util.log("DATA: othr channel failed to connect");
-                        oneCtx.close();
-                    }
-                }
-            };
-        cf.addListener(cfl);
-    }
-
-    @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception
     {
         if (oneCtx == null) {
             Util.log("DataRelayHandler: channel active (one)");
             oneCtx = ctx;
-            connectToOther();
         } else {
             Util.log("DataRelayHandler: channel active (other)");
             otherCtx = ctx;
