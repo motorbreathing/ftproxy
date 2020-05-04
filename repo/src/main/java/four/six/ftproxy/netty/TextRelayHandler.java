@@ -11,6 +11,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.ssl.SslHandler;
 
+import io.netty.handler.timeout.ReadTimeoutException;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -83,13 +85,6 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                 }
             };
         cf.addListener(cfl);
-    }
-
-    // The incoming value is a socket address that the client is listening
-    // at.
-    protected void relayFromClient(InetSocketAddress saddr)
-    {
-
     }
 
     private void initializeClient(ChannelHandlerContext ctx)
@@ -338,6 +333,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
     {
+        if (cause instanceof ReadTimeoutException)
+            Util.log("Text relay handler: read timed out");
         cause.printStackTrace();
         ctx.close();
     }

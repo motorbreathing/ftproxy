@@ -9,6 +9,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.SslHandler;
 
+import io.netty.handler.timeout.ReadTimeoutHandler;
+
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
 
@@ -25,6 +27,12 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
         return null;
     }
 
+    // Installs the default read timeout
+    public ChannelHandler getReadTimeoutHandler()
+    {
+        return new ReadTimeoutHandler(Util.READ_TIMEOUT_SECONDS);
+    }
+
     @Override
     public void initChannel(SocketChannel ch) throws Exception
     {
@@ -39,6 +47,10 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
         ChannelHandler encoder = getEncoder();
         if (encoder != null);
             ch.pipeline().addLast(encoder);
+
+        ChannelHandler readTimeoutHandler = getReadTimeoutHandler();
+        if (readTimeoutHandler != null);
+            ch.pipeline().addLast(readTimeoutHandler);
 
         ChannelHandler protocolHandler = getProtocolHandler();
         if (protocolHandler != null)

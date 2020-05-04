@@ -28,11 +28,14 @@ public class Util
     public static final String DEFAULT_REMOTE_HOST_STR = "127.0.0.1";
     public static final String DEFAULT_REMOTE_PORT_STR = "14646";
     public static final String DEFAULT_SERVER_BACKLOG_STR = "128";
+    public static final String DEFAULT_READ_TIMEOUT_STR = "30";
+
     public static final String THIS_HOST_KEY = "host";
     public static final String THIS_PORT_KEY = "port";
     public static final String REMOTE_HOST_KEY = "remote-host";
     public static final String REMOTE_PORT_KEY = "remote-port";
     public static final String SERVER_BACKLOG_KEY = "server-backlog";
+    public static final String READ_TIMEOUT_KEY = "read-timeout";
 
     public static final String THIS_HOST =
         System.getProperty(THIS_HOST_KEY, DEFAULT_THIS_HOST_STR);
@@ -45,6 +48,9 @@ public class Util
     public static final int SERVER_BACKLOG = 
         Integer.parseInt(System.getProperty(SERVER_BACKLOG_KEY,
                                             DEFAULT_SERVER_BACKLOG_STR));
+    public static final int READ_TIMEOUT_SECONDS = 
+        Integer.parseInt(System.getProperty(READ_TIMEOUT_KEY,
+                                            DEFAULT_READ_TIMEOUT_STR));
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
