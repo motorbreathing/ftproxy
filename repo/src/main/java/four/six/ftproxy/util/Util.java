@@ -18,6 +18,7 @@ public class Util
     public static final String COMMA = ",";
     public static final String LEFT_PARA = "(";
     public static final String RIGHT_PARA = ")";
+    public static final String PIPE = "|";
     public static final String EMPTYSTRING = "";
     public static final String REGEX_SPLIT_BY_SPACES = "\\s+";
     public static final String REGEX_SPLIT_BY_COMMA = "\\s*,\\s*";

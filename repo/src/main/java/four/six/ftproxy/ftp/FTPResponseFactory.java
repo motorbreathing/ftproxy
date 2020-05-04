@@ -15,6 +15,10 @@ public class FTPResponseFactory {
         // Passive mode: server response to a PASV from client
         if (args[0].equals(FTPPasvResponse.RESPONSE_227_STR))
             return new FTPPasvResponse(args, handler);
+        //
+        // Passive mode: server response to an EPSV from client
+        if (args[0].equals(FTPEpsvResponse.RESPONSE_229_STR))
+            return new FTPEpsvResponse(args, handler);
 
         // The simple default
         return new FTPTrivialResponse(args, handler);

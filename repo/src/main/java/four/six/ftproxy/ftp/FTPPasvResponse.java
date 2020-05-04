@@ -17,6 +17,16 @@ public class FTPPasvResponse extends FTPDataRelayResponse
     public static String formatResponse(byte[] addr, int port)
     {
         Util.log("FTP PASV response: format: port is " + port);
+        if (addr.length == Util.IPV4_ADDRESS_LENGTH) {
+            return formatV4Response(addr, port);
+        } else {
+            Util.log("Format FTP PASV response: invalid address (bad length: " + addr.length + ")");
+            return null;
+        }
+    }
+
+    private static String formatV4Response(byte[] addr, int port)
+    {
         String r = RESPONSE_227_STR;
         r += Util.SPACE;
         r += RESPONSE_DESC_STR;

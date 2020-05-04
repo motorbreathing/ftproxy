@@ -66,4 +66,15 @@ public class FTPUtil
         s += Integer.toString(port & 0x000000ff);
         return s;
     }
+
+    public static int processPipeSeparatedV6SocketAddress(String c)
+    {
+        int lastindex = c.lastIndexOf(Util.PIPE);
+        if (lastindex == -1)
+            return -1;
+        int nextindex = c.lastIndexOf(Util.PIPE, lastindex - 1);
+        if (nextindex == -1)
+            return -1;
+        return Integer.parseInt(c.substring(nextindex + 1, lastindex));
+    }
 }
