@@ -19,8 +19,10 @@ public class FTPDataRelayCommand extends FTPTrivialCommand {
         int port = saddr.getPort();
         if (ipaddr.length == Util.IPV4_ADDRESS_LENGTH)
             return FTPPortCommand.formatCommand(ipaddr, port);
-        else if (ipaddr.length != Util.IPV6_ADDRESS_LENGTH)
-            return null;
+        else if (ipaddr.length == Util.IPV6_ADDRESS_LENGTH)
+            return FTPEprtCommand.formatCommand(ipaddr, port);
+        else
+            Util.log("FTP Relay command: bad address (length = " + ipaddr.length + ")");
         return null;
     }
 }

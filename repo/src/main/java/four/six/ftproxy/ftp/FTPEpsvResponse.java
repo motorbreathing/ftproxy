@@ -40,7 +40,7 @@ public class FTPEpsvResponse extends FTPDataRelayResponse
         String c = String.join(Util.SPACE, args);
         Util.log("About to process FTP EPSV response: " + c);
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
-        return FTPUtil.processPipeSeparatedV6SocketAddress(c);
+        return FTPUtil.processPipeDelimitedV6SocketAddress(c);
     }
 
     @Override

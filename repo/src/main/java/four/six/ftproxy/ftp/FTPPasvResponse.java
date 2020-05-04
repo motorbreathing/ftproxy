@@ -32,7 +32,7 @@ public class FTPPasvResponse extends FTPDataRelayResponse
         r += RESPONSE_DESC_STR;
         r += Util.SPACE;
         r += Util.LEFT_PARA;
-        r += FTPUtil.formatCommaSeparatedV4SocketAddress(addr, port);
+        r += FTPUtil.formatCommaDelimitedV4SocketAddress(addr, port);
         r += Util.RIGHT_PARA;
         Util.log("FTP PASV response: formatted: " + r);
         return r + Util.CRLF;
@@ -43,7 +43,7 @@ public class FTPPasvResponse extends FTPDataRelayResponse
         String c = String.join(Util.SPACE, args);
         Util.log("About to process FTP PASV response: " + c);
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
-        InetSocketAddress address = FTPUtil.processCommaSeparatedV4SocketAddress(c);
+        InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(c);
         if (address == null) {
             Util.log("Bad address in PASV (" + String.join(Util.SPACE, args) + ")");
             return null;

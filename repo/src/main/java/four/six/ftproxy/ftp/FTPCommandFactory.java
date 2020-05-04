@@ -14,6 +14,9 @@ public class FTPCommandFactory {
         if (args[0].equalsIgnoreCase(FTPPortCommand.COMMAND_STR))
             return new FTPPortCommand(args, handler);
 
+        if (args[0].equalsIgnoreCase(FTPEprtCommand.COMMAND_STR))
+            return new FTPEprtCommand(args, handler);
+
         // The simple default
         return new FTPTrivialCommand(args, handler);
     }
