@@ -5,20 +5,20 @@ import java.net.InetSocketAddress;
 
 import four.six.ftproxy.util.Util;
 
-public class FTPDataTransferCommand extends FTPTrivialCommand {
+public class FTPDataRelayResponse extends FTPTrivialResponse {
 
-    FTPDataTransferCommand(String args[], FTPRelayHandler handler)
+    FTPDataRelayResponse(String args[], FTPRelayHandler handler)
     {
         super(args, handler);
     }
 
-    public static String getTransferCommand(InetSocketAddress saddr)
+    public static String getRelayResponse(InetSocketAddress saddr)
     {
         InetAddress iaddr = saddr.getAddress();
         byte[] ipaddr = iaddr.getAddress();
         int port = saddr.getPort();
         if (ipaddr.length == Util.IPV4_ADDRESS_LENGTH)
-            return FTPPortCommand.formatCommand(ipaddr, port);
+            return FTPPasvResponse.formatResponse(ipaddr, port);
         else if (ipaddr.length != Util.IPV6_ADDRESS_LENGTH)
             return null;
         return null;

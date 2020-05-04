@@ -21,10 +21,10 @@ import four.six.ftproxy.ssl.SSLHandlerProvider;
 @Sharable
 public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
-    private ChannelHandlerContext oneCtx = null;
-    private ChannelHandlerContext otherCtx = null;
+    protected ChannelHandlerContext oneCtx = null;
+    protected ChannelHandlerContext otherCtx = null;
 
-    public void channelActive(ChannelHandlerContext ctx) throws Exception
+    protected void initContext(ChannelHandlerContext ctx)
     {
         if (oneCtx == null) {
             Util.log("DataRelayHandler: channel active (one)");
@@ -33,6 +33,11 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
             Util.log("DataRelayHandler: channel active (other)");
             otherCtx = ctx;
         }
+    }
+
+    public void channelActive(ChannelHandlerContext ctx) throws Exception
+    {
+        initContext(ctx);
     }
 
     @Override
@@ -79,11 +84,15 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
-    public void closeDataSession()
+    public void closeSession()
     {
         if (oneCtx != null)
+        {
             oneCtx.close();
+        }
         if (otherCtx != null)
+        {
             otherCtx.close();
+        }
     }
 }
