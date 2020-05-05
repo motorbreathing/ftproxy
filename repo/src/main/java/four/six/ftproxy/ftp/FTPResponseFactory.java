@@ -11,7 +11,11 @@ public class FTPResponseFactory {
         // The server nodded agreement to something
         if (args[0].equals(FTPOkResponse.RESPONSE_200_STR))
             return new FTPOkResponse(args, handler);
-        //
+
+        // The server nodded agreement to something
+        if (args[0].equals(FTPNotImplementedResponse.RESPONSE_502_STR))
+            return new FTPNotImplementedResponse(args, handler);
+
         // Server approved an "AUTH SSL/TLS"
         if (args[0].equals(FTPAuthResponse.RESPONSE_234_STR))
             return new FTPAuthResponse(args, handler);
