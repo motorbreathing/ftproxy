@@ -135,6 +135,10 @@ public class FTPUtil
         int nextindex = c.lastIndexOf(Util.PIPE, lastindex - 1);
         if (nextindex == -1)
             return -1;
-        return Integer.parseInt(c.substring(nextindex + 1, lastindex));
+        try  {
+            return Integer.parseInt(c.substring(nextindex + 1, lastindex));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }

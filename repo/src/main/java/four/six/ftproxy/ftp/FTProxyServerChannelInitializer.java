@@ -8,22 +8,38 @@ import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class FTProxyServerChannelInitializer extends TextRelayChannelInitializer
 {
-    FTPRelayHandler handler = new FTPRelayHandler();
+    FTPRelayHandler handler;
     boolean sslEnabled;
 
     public FTProxyServerChannelInitializer()
     {
         sslEnabled = false;
+        handler = null;
+    }
+
+    public FTProxyServerChannelInitializer(FTPRelayHandler handler, boolean sslEnabled)
+    {
+        this.handler = handler;
+        this.sslEnabled = sslEnabled;
+    }
+
+    public FTProxyServerChannelInitializer(FTPRelayHandler handler)
+    {
+        this.handler = handler;
+        this.sslEnabled = false;
     }
 
     public FTProxyServerChannelInitializer(boolean sslEnabled)
     {
+        this.handler = null;
         this.sslEnabled = sslEnabled;
     }
 
     @Override
     public ChannelHandler getProtocolHandler()
     {
+        if (handler == null)
+            return new FTPRelayHandler();
         return handler;
     }
 

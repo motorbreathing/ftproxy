@@ -7,6 +7,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.handler.timeout.ReadTimeoutException;
 
 import java.util.Set;
 import java.net.InetSocketAddress;
@@ -22,6 +23,10 @@ import four.six.ftproxy.ssl.SSLHandlerProvider;
 public class FTPRelayHandler extends TextRelayHandler
 {
     private Set<DataRelayHandler> aliveDataSessions = ConcurrentHashMap.newKeySet();
+    private boolean controlSSLRequested = false;
+    private boolean controlSSLEnabled = false;
+    private boolean dataSSLRequested = false;
+    private boolean dataSSLEnabled = false;
 
     @Override
     public String processCommand(String line)
@@ -47,6 +52,11 @@ public class FTPRelayHandler extends TextRelayHandler
         getChannelInitializer(ChannelHandler handler, boolean sslEnabled,
                               boolean client)
     {
+        if (sslEnabled)
+            Util.log("Setting up data connection with SSL enabled");
+        else
+            Util.log("Setting up data connection with SSL disabled");
+
         DataRelayChannelInitializer ci = 
 
             sslEnabled ?
@@ -87,7 +97,7 @@ public class FTPRelayHandler extends TextRelayHandler
     public boolean finishActiveRelay(DataRelayHandler handler)
     {
         ChannelInitializer<? extends Channel> ci =
-            getChannelInitializer(handler, false, true);
+            getChannelInitializer(handler, dataSSLEnabled, true);
         ChannelFuture cf = NettyUtil.getListenerChannel(serverFacingAddress, ci);
         if (cf == null) {
             Util.log("Active relay: failed to create listener");
@@ -109,7 +119,7 @@ public class FTPRelayHandler extends TextRelayHandler
     public void finishPassiveRelay(DataRelayHandler handler, InetSocketAddress addr)
     {
         ChannelInitializer<? extends Channel> ci =
-            getChannelInitializer(handler, false, false);
+            getChannelInitializer(handler, dataSSLEnabled, true);
         ChannelFuture cf = NettyUtil.getChannelToAddress(addr, ci);
         ChannelFutureListener cfl =
             new ChannelFutureListener() {
@@ -142,7 +152,7 @@ public class FTPRelayHandler extends TextRelayHandler
     {
         DataRelayHandler handler = new DataRelayHandler();
         ChannelInitializer<? extends Channel> ci =
-            getChannelInitializer(handler, false, false);
+            getChannelInitializer(handler, dataSSLEnabled, false);
         ChannelFuture cf = NettyUtil.getChannelToAddress(addr, ci);
         ChannelFutureListener cfl =
             new ChannelFutureListener() {
@@ -172,8 +182,7 @@ public class FTPRelayHandler extends TextRelayHandler
         cf.addListener(cfl);
     }
 
-    // Handle data relay: passive mode
-    // The specified argument is a server-provided listener address
+    // PASV
     public void startPassiveRelay(InetSocketAddress addr)
     {
         DataRelayHandler handler = new DataRelayHandler() {
@@ -186,7 +195,7 @@ public class FTPRelayHandler extends TextRelayHandler
              }
         };
         ChannelInitializer<? extends Channel> ci =
-            getChannelInitializer(handler, false, false);
+            getChannelInitializer(handler, dataSSLEnabled, false);
         ChannelFuture cf = NettyUtil.getListenerChannel(clientFacingAddress, ci);
         if (cf == null) {
             Util.log("Passive relay: failed to create listener");
@@ -205,9 +214,13 @@ public class FTPRelayHandler extends TextRelayHandler
         }
     }
 
+    // EPSV
     public void startPassiveRelay(int port)
     {
-        startPassiveRelay(new InetSocketAddress(serverFacingAddress, port));
+        if (port > 0)
+            startPassiveRelay(new InetSocketAddress(serverFacingAddress, port));
+        else
+            Util.log("Passive relay: invalid port specified by remote server");
     }
 
     @Override
@@ -218,5 +231,60 @@ public class FTPRelayHandler extends TextRelayHandler
             handler.closeSession();
         aliveDataSessions.clear();
         super.handlerRemoved(ctx);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+    {
+        if (cause instanceof ReadTimeoutException)
+        {
+            Util.log("Text relay handler: read timed out");
+            if (aliveDataSessions.size() > 0) {
+                Util.log("Ignoring read timeout expiry due to active data sessions");
+                return;
+            }
+        }
+        cause.printStackTrace();
+        ctx.close();
+    }
+
+    public boolean dataSSLRequested()
+    {
+        return dataSSLRequested;
+    }
+
+    public void dataSSLRequested(boolean f)
+    {
+        dataSSLRequested = f;
+    }
+
+    public boolean dataSSLEnabled()
+    {
+        return dataSSLEnabled;
+    }
+
+    public void dataSSLEnabled(boolean f)
+    {
+        dataSSLEnabled = f;
+    }
+
+    public boolean controlSSLRequested()
+    {
+        return controlSSLRequested;
+    }
+
+    public void controlSSLRequested(boolean f)
+    {
+        controlSSLRequested = f;
+    }
+
+    public boolean controlSSLEnabled()
+    {
+        return controlSSLEnabled;
+    }
+
+    public void controlSSLEnabled(boolean f)
+    {
+        controlSSLEnabled = f;
     }
 }

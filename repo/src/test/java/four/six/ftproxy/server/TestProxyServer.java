@@ -25,8 +25,8 @@ public class TestProxyServer extends AbstractTestServer {
         if (ftpServerChannelInitializer != null)
             return ftpServerChannelInitializer;
 
-        ftpServerChannelInitializer = new FTProxyServerChannelInitializer(sslStatus);
-        handler = (FTPRelayHandler)ftpServerChannelInitializer.getProtocolHandler();
+        handler = new FTPRelayHandler();
+        ftpServerChannelInitializer = new FTProxyServerChannelInitializer(handler, sslStatus);
         return ftpServerChannelInitializer;
     }
 

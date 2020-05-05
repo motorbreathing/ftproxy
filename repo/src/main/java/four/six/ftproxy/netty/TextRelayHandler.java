@@ -36,7 +36,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     protected InetAddress clientFacingAddress;
     protected InetAddress serverFacingAddress;
 
-    private boolean serverSSL;
+    private boolean serverSSL = false;
 
     public TextRelayHandler()
     {
@@ -45,6 +45,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     private void initiateServerConnect()
     {
+        Util.log("Initiating server connect with SSL " + (serverSSL ? "enabled" : "disabled"));
         TextRelayChannelInitializer selfPointer = 
                 serverSSL ?  new TextRelayChannelInitializer() {
                                  @Override
@@ -333,8 +334,6 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
     {
-        if (cause instanceof ReadTimeoutException)
-            Util.log("Text relay handler: read timed out");
         cause.printStackTrace();
         ctx.close();
     }

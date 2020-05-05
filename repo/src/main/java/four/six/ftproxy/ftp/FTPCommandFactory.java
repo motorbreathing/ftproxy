@@ -11,6 +11,9 @@ public class FTPCommandFactory {
         if (args[0].equalsIgnoreCase(FTPAuthCommand.COMMAND_STR))
             return new FTPAuthCommand(args, handler);
 
+        if (args[0].equalsIgnoreCase(FTPProtCommand.COMMAND_STR))
+            return new FTPProtCommand(args, handler);
+
         if (args[0].equalsIgnoreCase(FTPPortCommand.COMMAND_STR))
             return new FTPPortCommand(args, handler);
 
