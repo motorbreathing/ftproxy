@@ -58,14 +58,13 @@ public class FTPRelayHandler extends TextRelayHandler
             Util.log("Setting up data connection with SSL disabled");
 
         DataRelayChannelInitializer ci = 
-
-            sslEnabled ?
-
             new DataRelayChannelInitializer() {
                 @Override
                 public ChannelHandler getSSLHandler(Channel ch)
                 {
-                    if (client)
+                    if (!sslEnabled)
+                        return null;
+                    else if (client)
                         return SSLHandlerProvider.getClientSSLHandler(ch);
                     else
                         return SSLHandlerProvider.getServerSSLHandler(ch);
@@ -76,18 +75,7 @@ public class FTPRelayHandler extends TextRelayHandler
                 {
                     return handler;
                 };
-            }
-
-            : 
-
-            new DataRelayChannelInitializer() {
-                @Override
-                public ChannelHandler getProtocolHandler()
-                {
-                    return handler;
-                }
             };
-
         return ci;
     }
 

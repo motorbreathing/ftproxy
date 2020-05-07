@@ -5,18 +5,23 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 import four.six.ftproxy.util.Util;
+import four.six.ftproxy.util.TestUtil;
 import four.six.ftproxy.client.TestClient;
+import four.six.ftproxy.ftp.FTPAuthCommand;
 
 public class ServerTests
 {
     private final int echoServerPortStart = 9090;
     private final int echoServerPortEnd = 10090;
+    private final int ftpServerPortStart = 5050;
+    private final int ftpServerPortEnd = 6050;
     private final int proxyServerPortStart = 8080;
     private final int proxyServerPortEnd = 9080;
     private final int serverStartTimeoutMillis = 1000;
     private final int readTimeoutMillis = 5000;
 
     TestEchoServer echoServer;
+    TestEchoServer ftpServer;
     TestProxyServer proxyServer;
 
     public int startEchoServer(boolean ssl) throws Exception
@@ -38,10 +43,36 @@ public class ServerTests
         return p;
     }
 
+    public int startFTPServer(boolean ssl) throws Exception
+    {
+        int p = ftpServerPortStart;
+        while (p < ftpServerPortEnd)
+        {
+            ftpServer = new TestFTPServer();
+            if (ssl)
+                ftpServer.enableSSL();
+            ftpServer.setPort(p);
+            ftpServer.start();
+            Thread.sleep(serverStartTimeoutMillis);
+            if (ftpServer.isRunning())
+                break;
+            p++;
+        }
+        assertTrue(ftpServer.isRunning());
+        return p;
+    }
+
+
     public void stopEchoServer()
     {
         if (echoServer != null && echoServer.isRunning())
             echoServer.interrupt();
+    }
+
+    public void stopFTPServer()
+    {
+        if (ftpServer != null && ftpServer.isRunning())
+            ftpServer.interrupt();
     }
 
     public int startProxyServer(boolean ssl) throws Exception
@@ -168,7 +199,6 @@ public class ServerTests
         c.disconnect();
     }
 
-    @Test
     public void testEchoServer() throws Exception
     {
         testEchoServerSSL(false, false);
@@ -236,12 +266,60 @@ public class ServerTests
         c.disconnect();
     }
 
-    @Test
     public void testProxyServer() throws Exception
     {
         testProxyServerSSL(true, true, true);
         testProxyServerSSL(false, false, true);
         testProxyServerSSL(true, true, false);
         testProxyServerExplicitSSL();
+    }
+
+    public void testFTPServerExplicitSSL(boolean negativeTest) throws Exception
+    {
+        int ftpServerPort = startFTPServer(false);
+        TestClient c = new TestClient();
+        c.connect(Util.THIS_HOST, ftpServerPort, false);
+        String s1 = "hello";
+        c.write(s1 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(TestUtil.withoutCRLF(TestFTPHandler.GENERIC_RESPONSE_200_STR)));
+
+        c.requestExplicitSSL();
+        assertTrue(c.readLine(readTimeoutMillis).equals(TestUtil.withoutCRLF(FTPAuthCommand.RESPONSE_STR)));
+
+        if (!negativeTest)
+            c.enableSSL();
+        c.write(s1 + Util.CRLF);
+        boolean npe = false;
+        try {
+            assertTrue(c.readLine(readTimeoutMillis).equals(TestUtil.withoutCRLF(TestFTPHandler.GENERIC_RESPONSE_200_STR)));
+        } catch (NullPointerException e) {
+            npe = true;
+        }
+
+        if (negativeTest)
+            assertTrue(npe == true);
+        else
+            assertTrue(npe == false);
+        
+        stopFTPServer();
+        c.disconnect();
+    }
+
+    public void testFTPServer() throws Exception
+    {
+        testFTPServerExplicitSSL(false);
+        // Negative test
+        testFTPServerExplicitSSL(true);
+    }
+
+    @Test
+    public void runServerTests() throws Exception
+    {
+        // No Proxy; client <-> echo server
+        testEchoServer();
+        // client <-> proxy <-> echo server
+        testProxyServer();
+        // No Proxy; client <-> ftp server
+        testFTPServer();
     }
 }

@@ -14,6 +14,8 @@ public class FTPUtil
 {
     public static final String UNRECOGNIZED_COMMAND_STR =
         "500 Syntax error - command unrecognized\r\n";
+    public static final String UNIMPLEMENTED_COMMAND_STR =
+        "502 error - command unimplemented\r\n";
 
     public static ChannelFuture
         getFTProxyServerChannel() throws Exception

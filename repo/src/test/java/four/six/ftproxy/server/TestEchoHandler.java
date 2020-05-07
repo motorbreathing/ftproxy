@@ -18,14 +18,19 @@ public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
         this.ctx = ctx;
     }
 
-    @Override
-    public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
+    protected void process(ChannelHandlerContext ctx, String incoming)
     {
-        Util.log("TestEchoHandler: read: " + incoming);
         if (incoming.equalsIgnoreCase("quit"))
             ctx.close();
         else
             ctx.writeAndFlush(incoming);
+    }
+
+    @Override
+    public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception
+    {
+        Util.log("TestEchoHandler: read: " + incoming);
+        process(ctx, incoming);
     }
 
     @Override
@@ -39,4 +44,3 @@ public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
         ctx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ctx.channel()));
     }
 }
-

@@ -11,37 +11,41 @@ import four.six.ftproxy.netty.TextRelayChannelInitializer;
 
 public class TestEchoServer extends AbstractTestServer {
     private final static String myName = "Test Echo Server";
-    private final TestEchoHandler handler = new TestEchoHandler();
+    private final TestEchoHandler handler = createProtocolHandler();
 
     public TestEchoServer()
     {
         setMyName(myName);
     }
 
+    protected TestEchoHandler createProtocolHandler()
+    {
+        return new TestEchoHandler();
+    }
+
+    protected ChannelHandler getProtocolHandler()
+    {
+        return handler;
+    }
+
     @Override
     protected ChannelInitializer<? extends Channel> getTestServerChannelInitializer()
     {
-        if (sslStatus)
-            return new TextRelayChannelInitializer() {
-                        @Override
-                        public ChannelHandler getSSLHandler(Channel ch)
-                        {
-                            return SSLHandlerProvider.getServerSSLHandler(ch);
-                        }
+        return new TextRelayChannelInitializer() {
+                       @Override
+                       public ChannelHandler getSSLHandler(Channel ch)
+                       {
+                           if (sslStatus)
+                               return SSLHandlerProvider.getServerSSLHandler(ch);
+                           else
+                               return null;
+                       }
 
-                        @Override
-                        public ChannelHandler getProtocolHandler()
-                        {
-                            return handler;
-                        }
-                   };
-        else
-            return new TextRelayChannelInitializer() {
-                        @Override
-                        public ChannelHandler getProtocolHandler()
-                        {
-                            return handler;
-                        }
+                       @Override
+                       public ChannelHandler getProtocolHandler()
+                       {
+                           return TestEchoServer.this.getProtocolHandler();
+                       }
                    };
     }
 

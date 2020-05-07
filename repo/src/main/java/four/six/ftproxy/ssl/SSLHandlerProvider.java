@@ -24,11 +24,10 @@ public class SSLHandlerProvider {
                                .sslProvider(SslProvider.OPENSSL)
                                .build();
             // Client-side SSL
-            clientSslContext = SslContextBuilder.forClient()
+            clientSslContext = SslContextBuilder
+                               .forClient()
                                .sslProvider(SslProvider.OPENSSL)
                                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                               .sessionCacheSize(10000)
-                               .sessionTimeout(3000)
                                .build();
         } catch (CertificateException certex) {
             certex.printStackTrace();

@@ -97,6 +97,11 @@ public class TestClient {
          ch.writeAndFlush(line).sync();
     }
 
+    public void requestExplicitSSL() throws Exception
+    {
+        write("AUTH TLS\r\n");
+    }
+
     public void connect(String host, int port, boolean ssl) throws Exception
     {
         try {

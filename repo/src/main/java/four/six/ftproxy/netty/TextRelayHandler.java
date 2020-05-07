@@ -47,27 +47,22 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     {
         Util.log("Initiating server connect with SSL " + (serverSSL ? "enabled" : "disabled"));
         TextRelayChannelInitializer selfPointer = 
-                serverSSL ?  new TextRelayChannelInitializer() {
-                                 @Override
-                                 public ChannelHandler getSSLHandler(Channel ch)
-                                 {
-                                     return SSLHandlerProvider.getClientSSLHandler(ch);
-                                 }
+                new TextRelayChannelInitializer() {
+                       @Override
+                       public ChannelHandler getSSLHandler(Channel ch)
+                       {
+                           if (serverSSL)
+                               return SSLHandlerProvider.getClientSSLHandler(ch);
+                           else
+                               return null;
+                       }
 
-                                 @Override
-                                 public ChannelHandler getProtocolHandler()
-                                 {
-                                     return TextRelayHandler.this;
-                                 }
-                             }
-                          :
-                             new TextRelayChannelInitializer() {
-                                 @Override
-                                 public ChannelHandler getProtocolHandler()
-                                 {
-                                     return TextRelayHandler.this;
-                                 }
-                             };
+                       @Override
+                       public ChannelHandler getProtocolHandler()
+                       {
+                           return TextRelayHandler.this;
+                       }
+                };
 
         ChannelFuture cf = NettyUtil.getChannelToRemoteHost(selfPointer);
 
