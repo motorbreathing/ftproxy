@@ -305,33 +305,42 @@ public class ServerTests
         c.disconnect();
     }
 
-    public void testFTPServerDataActiveV4() throws Exception
+    public void testFTPServerDataActiveV4(boolean dataSSL) throws Exception
     {
         int ftpServerPort = startFTPServer(false);
         TestClient c = new TestClient();
         c.connect(Util.THIS_HOST, ftpServerPort, false);
+        if (dataSSL) {
+            c.requestDataSSL();
+            String resp = c.readLine(readTimeoutMillis);
+            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
+            c.enableDataSSL();
+        }
         c.getFileActiveV4();
-        String received = c.readFile(5000);
+        String received = c.readFile(readTimeoutMillis);
         assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
         Util.log("testFTPServerDataActiveV4: " + received);
+        stopFTPServer();
+        c.disconnect();
     }
 
     public void testFTPServer() throws Exception
     {
-        //testFTPServerExplicitSSL(false);
+        testFTPServerExplicitSSL(false);
         // Negative test
-        //testFTPServerExplicitSSL(true);
+        testFTPServerExplicitSSL(true);
         // Test file transfer in Active mode
-        testFTPServerDataActiveV4();
+        testFTPServerDataActiveV4(false);
+        testFTPServerDataActiveV4(true);
     }
 
     @Test
     public void runServerTests() throws Exception
     {
         // No Proxy; client <-> echo server
-        // testEchoServer();
+        testEchoServer();
         // client <-> proxy <-> echo server
-        // testProxyServer();
+        testProxyServer();
         // No Proxy; client <-> ftp server
         testFTPServer();
     }

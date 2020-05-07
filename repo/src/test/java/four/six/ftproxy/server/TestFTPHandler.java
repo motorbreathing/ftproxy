@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.ByteBuf;
@@ -26,10 +27,16 @@ public class TestFTPHandler extends TestEchoHandler {
     public static final String PROT_RESPONSE_200_C_STR = "200 Protection level set to C\r\n";
     public static final String PROT_RESPONSE_200_P_STR = "200 Protection level set to P\r\n";
     public static final String JACKAL_STR = "The Day Of The Jackal";
+    private static final Charset charset = Charset.forName(Util.UTF8_STR);
 
     private ChannelHandlerContext ctx;
     boolean sslAllowed = true;
     boolean dataSSLEnabled = false;
+
+    public void unimplementSSL()
+    {
+        sslAllowed = false;
+    }
 
     protected ChannelHandler getFileSendChannelHandler()
     {
@@ -40,9 +47,14 @@ public class TestFTPHandler extends TestEchoHandler {
                        {
                            Util.log("TestFTPServer: Active mode: connected");
                            ByteBuf response =
-                               Unpooled.copiedBuffer(JACKAL_STR, Charset.forName("UTF-8"));
-                           ctx.writeAndFlush(response);
-                           ctx.close();
+                               Unpooled.copiedBuffer(JACKAL_STR, charset);
+                           ChannelFuture cf = ctx.writeAndFlush(response);
+                           cf.addListener(new ChannelFutureListener() {
+                               @Override
+                               public void operationComplete(ChannelFuture f) {
+                                   f.channel().close();
+                               }
+                           });
                         }
                      };
     }
@@ -53,8 +65,11 @@ public class TestFTPHandler extends TestEchoHandler {
             new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
-                if (dataSSLEnabled)
-                    ch.pipeline().addLast(SSLHandlerProvider.getServerSSLHandler(ch));
+                Util.log("File send: initializing channel");
+                if (dataSSLEnabled) {
+                    Util.log("File send: enabling SSL");
+                    ch.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
+                }
                 ChannelHandler handler = getFileSendChannelHandler();
                 ch.pipeline().addLast(handler);
             }
@@ -93,7 +108,7 @@ public class TestFTPHandler extends TestEchoHandler {
         if (args[0].equalsIgnoreCase(FTPPortCommand.COMMAND_STR)) {
             InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(args[1]);
             ChannelInitializer<SocketChannel> ci = getFileSendChannelInitializer();
-            ChannelFuture cf = NettyUtil.getChannelToAddress(address, ci);
+            NettyUtil.getChannelToAddress(address, ci);
             return;
         }
         ctx.writeAndFlush(GENERIC_RESPONSE_200_STR);

@@ -33,6 +33,7 @@ import four.six.ftproxy.ftp.FTPDataRelayCommand;
 
 public class TestClient {
     private Channel ch;
+
     private LineProvider lp;
     private Lock lpLock;
     private Condition lpCond;
@@ -40,6 +41,8 @@ public class TestClient {
     private String fileContents = Util.EMPTYSTRING;
     private Lock fileLock;
     private Condition fileCond;
+
+    private boolean dataSSLEnabled = false;
 
     public TestClient()
     {
@@ -135,12 +138,12 @@ public class TestClient {
         write("AUTH TLS\r\n");
     }
 
-    public void enableDataSSL() throws Exception
+    public void requestDataSSL() throws Exception
     {
         write("PROT P\r\n");
     }
 
-    public void disableDataSSL() throws Exception
+    public void requestDataClear() throws Exception
     {
         write("PROT C\r\n");
     }
@@ -203,6 +206,10 @@ public class TestClient {
                 public void initChannel(SocketChannel ch) throws Exception
                 {
                     Util.log("File receive: initializing channel");
+                    if (dataSSLEnabled) {
+                        ch.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
+                        Util.log("File receive: enabling SSL");
+                    }
                     ChannelHandler handler = TestClient.this.getFileReceiveHandler();
                     ch.pipeline().addLast(handler);
                 }
@@ -234,6 +241,16 @@ public class TestClient {
     {
         Util.log("Client: disconnecting");
         ch.close();
+    }
+
+    public void enableDataSSL()
+    {
+        dataSSLEnabled = true;
+    }
+
+    public void disableDataSSL()
+    {
+        dataSSLEnabled = false;
     }
 
     public void enableSSL()
