@@ -3,15 +3,24 @@ package four.six.ftproxy.client;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.netty.buffer.ByteBuf;
+
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.netty.StringEncoder;
@@ -20,6 +29,7 @@ import four.six.ftproxy.netty.TestClientHandler;
 import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
+import four.six.ftproxy.ftp.FTPDataRelayCommand;
 
 public class TestClient {
     private Channel ch;
@@ -27,11 +37,18 @@ public class TestClient {
     private Lock lpLock;
     private Condition lpCond;
 
+    private String fileContents = Util.EMPTYSTRING;
+    private Lock fileLock;
+    private Condition fileCond;
+
     public TestClient()
     {
         lp = new LineProvider();
         lpLock = new ReentrantLock();
         lpCond = lpLock.newCondition();
+
+        fileLock = new ReentrantLock();
+        fileCond = fileLock.newCondition();
     }
 
     public void addString(String data)
@@ -55,6 +72,22 @@ public class TestClient {
             e.printStackTrace();
         } finally {
             lpLock.unlock();
+        }
+        return null;
+    }
+
+    public String readFile(long millis)
+    {
+        try {
+            fileLock.lock();
+            if (fileContents.length() != 0)
+                return fileContents;
+            fileCond.await(millis, TimeUnit.MILLISECONDS);
+            return fileContents;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            fileLock.unlock();
         }
         return null;
     }
@@ -102,6 +135,16 @@ public class TestClient {
         write("AUTH TLS\r\n");
     }
 
+    public void enableDataSSL() throws Exception
+    {
+        write("PROT P\r\n");
+    }
+
+    public void disableDataSSL() throws Exception
+    {
+        write("PROT C\r\n");
+    }
+
     public void connect(String host, int port, boolean ssl) throws Exception
     {
         try {
@@ -112,6 +155,74 @@ public class TestClient {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public void resetFileContents()
+    {
+        fileContents = Util.EMPTYSTRING;
+    }
+
+    public void addFileContent(String incoming)
+    {
+        fileLock.lock();
+        fileContents += incoming;
+        fileLock.unlock();
+    }
+
+    public void finishFileContent()
+    {
+        fileLock.lock();
+        fileCond.signalAll();
+        fileLock.unlock();
+    }
+
+    protected ChannelHandler getFileReceiveHandler()
+    {
+        return
+        new ChannelInboundHandlerAdapter() {
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg)
+                throws Exception
+            {
+                String incoming = ((ByteBuf)msg).toString(Charset.forName("UTF-8"));
+                Util.log("getFileActiveV4 handler: " + incoming);
+                TestClient.this.addFileContent(incoming);
+            }
+
+            @Override public void handlerRemoved(ChannelHandlerContext ctx)
+            {
+                TestClient.this.finishFileContent();
+            }
+        };
+    }
+
+    protected ChannelInitializer<SocketChannel> getFileReceiveInitializer()
+    {
+        ChannelInitializer<SocketChannel> ci = new ChannelInitializer<SocketChannel>() {
+                @Override
+                public void initChannel(SocketChannel ch) throws Exception
+                {
+                    Util.log("File receive: initializing channel");
+                    ChannelHandler handler = TestClient.this.getFileReceiveHandler();
+                    ch.pipeline().addLast(handler);
+                }
+        };
+        return ci;
+    }
+
+    public void getFileActiveV4() throws Exception
+    {
+        if (ch == null)
+            throw new IllegalStateException();
+        InetAddress addr = ((SocketChannel)ch).localAddress().getAddress();
+        if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
+            Util.log("Invalid address for Active V4 relay");
+            throw new IllegalStateException();
+        }
+        ChannelFuture cf = NettyUtil.getListenerChannel(addr, getFileReceiveInitializer());
+        InetSocketAddress localAddr = (InetSocketAddress)cf.channel().localAddress();
+        resetFileContents();
+        write(FTPDataRelayCommand.getRelayCommand(localAddr));
     }
 
     public void connect(String host, int port) throws Exception

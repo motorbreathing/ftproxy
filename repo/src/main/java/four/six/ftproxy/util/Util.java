@@ -39,6 +39,7 @@ public class Util
     public static final String READ_TIMEOUT_KEY = "read-timeout";
     public static final String TERMINATE_SSL_KEY = "terminate-ssl";
 
+    public static final String LOCAL_HOST = "localhost";
     public static final String THIS_HOST =
         System.getProperty(THIS_HOST_KEY, DEFAULT_THIS_HOST_STR);
     public static final int THIS_PORT =

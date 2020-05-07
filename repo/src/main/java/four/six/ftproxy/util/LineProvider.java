@@ -26,6 +26,11 @@ public class LineProvider
         stash += s;
     }
 
+    public void clearStashedString()
+    {
+        stash = Util.EMPTYSTRING;
+    }
+
     public String getStashedString()
     {
         return stash.length() == 0 ? null : stash;

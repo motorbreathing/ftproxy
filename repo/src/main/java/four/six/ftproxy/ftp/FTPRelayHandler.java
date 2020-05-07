@@ -95,7 +95,7 @@ public class FTPRelayHandler extends TextRelayHandler
         String command = FTPDataRelayCommand.getRelayCommand(localAddr);
         if (command != null) {
             aliveDataSessions.add(handler);
-            writeToServer(FTPDataRelayCommand.getRelayCommand(localAddr));
+            writeToServer(command);
             Util.log("Active relay: " + command);
         } else {
             Util.log("Active relay: failed to format command");
