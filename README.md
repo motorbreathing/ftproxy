@@ -9,7 +9,7 @@ Java-Netty asynchronous FTP proxy
 3. Update: a considerable amount of functionality is in place.
 
 4. Here's how to bring up the FTP Proxy at a specified port (8081) on the
-   local machine (localhost), while also specfifying a specific ftp host/port
+   local machine (localhost), while also specifying a specific ftp host/port
    (ftphost:9091) as the target backend:
 
 mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhost -Dport=8081 -Dremote-host=ftphost -Dremote-port=9091
