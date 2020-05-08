@@ -30,6 +30,7 @@ import four.six.ftproxy.util.Util;
 import four.six.ftproxy.util.LineProvider;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
 import four.six.ftproxy.ftp.FTPDataRelayCommand;
+import four.six.ftproxy.ftp.FTPUtil;
 
 public class TestClient {
     private Channel ch;
@@ -43,6 +44,7 @@ public class TestClient {
     private Condition fileCond;
 
     private boolean dataSSLEnabled = false;
+    private int readTimeoutMillis = 5000;
 
     public TestClient()
     {
@@ -217,19 +219,78 @@ public class TestClient {
         return ci;
     }
 
-    public void getFileActiveV4() throws Exception
+    public String getFilePassiveV4() throws Exception
     {
         if (ch == null)
             throw new IllegalStateException();
         InetAddress addr = ((SocketChannel)ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
-            Util.log("Invalid address for Active V4 relay");
+            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V4 relay");
+            throw new IllegalStateException();
+        }
+        write("PASV\r\n");
+        String c = readLine(readTimeoutMillis);
+        if (c == null)
+            return null;
+        c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
+        resetFileContents();
+        InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(c);
+        NettyUtil.getChannelToAddress(address, getFileReceiveInitializer());
+        return readFile(readTimeoutMillis);
+    }
+
+    public String getFilePassiveV6() throws Exception
+    {
+        if (ch == null)
+            throw new IllegalStateException();
+        InetAddress addr = ((SocketChannel)ch).localAddress().getAddress();
+        if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
+            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
+            throw new IllegalStateException();
+        }
+        write("EPSV\r\n");
+        String c = readLine(readTimeoutMillis);
+        if (c == null)
+            return null;
+        c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
+        Util.log("EPSV response is: " + c);
+        resetFileContents();
+        int port = FTPUtil.processPipeDelimitedV6SocketAddress(c);
+        NettyUtil.getChannelToAddress(new InetSocketAddress(addr, port),
+                                      getFileReceiveInitializer());
+        return readFile(readTimeoutMillis);
+    }
+
+    public String getFileActiveV4() throws Exception
+    {
+        if (ch == null)
+            throw new IllegalStateException();
+        InetAddress addr = ((SocketChannel)ch).localAddress().getAddress();
+        if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
+            Util.log("Invalid address (length = " + addr.getAddress().length + ")for Active V4 relay");
             throw new IllegalStateException();
         }
         ChannelFuture cf = NettyUtil.getListenerChannel(addr, getFileReceiveInitializer());
         InetSocketAddress localAddr = (InetSocketAddress)cf.channel().localAddress();
         resetFileContents();
         write(FTPDataRelayCommand.getRelayCommand(localAddr));
+        return readFile(readTimeoutMillis);
+    }
+
+    public String getFileActiveV6() throws Exception
+    {
+        if (ch == null)
+            throw new IllegalStateException();
+        InetAddress addr = ((SocketChannel)ch).localAddress().getAddress();
+        if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
+            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
+            throw new IllegalStateException();
+        }
+        ChannelFuture cf = NettyUtil.getListenerChannel(addr, getFileReceiveInitializer());
+        InetSocketAddress localAddr = (InetSocketAddress)cf.channel().localAddress();
+        resetFileContents();
+        write(FTPDataRelayCommand.getRelayCommand(localAddr));
+        return readFile(readTimeoutMillis);
     }
 
     public void connect(String host, int port) throws Exception

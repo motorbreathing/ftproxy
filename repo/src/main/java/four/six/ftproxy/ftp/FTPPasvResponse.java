@@ -6,6 +6,7 @@ import four.six.ftproxy.util.Util;
 
 public class FTPPasvResponse extends FTPDataRelayResponse
 {
+    public static final String COMMAND_STR = "PASV";
     public static final String RESPONSE_227_STR = "227";
     public static final String RESPONSE_DESC_STR = "Entering Passive Mode";
 

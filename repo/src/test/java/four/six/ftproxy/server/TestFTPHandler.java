@@ -1,5 +1,6 @@
 package four.six.ftproxy.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
@@ -11,6 +12,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import four.six.ftproxy.ssl.SSLHandlerProvider;
@@ -20,6 +22,10 @@ import four.six.ftproxy.ftp.FTPUtil;
 import four.six.ftproxy.ftp.FTPAuthCommand;
 import four.six.ftproxy.ftp.FTPProtCommand;
 import four.six.ftproxy.ftp.FTPPortCommand;
+import four.six.ftproxy.ftp.FTPEprtCommand;
+import four.six.ftproxy.ftp.FTPPasvResponse;
+import four.six.ftproxy.ftp.FTPEpsvResponse;
+import four.six.ftproxy.ftp.FTPDataRelayResponse;
 
 public class TestFTPHandler extends TestEchoHandler {
 
@@ -111,6 +117,26 @@ public class TestFTPHandler extends TestEchoHandler {
             NettyUtil.getChannelToAddress(address, ci);
             return;
         }
+
+        if (args[0].equalsIgnoreCase(FTPEprtCommand.COMMAND_STR)) {
+            InetSocketAddress address = FTPUtil.processPipeDelimitedSocketAddress(args[1]);
+            ChannelInitializer<SocketChannel> ci = getFileSendChannelInitializer();
+            NettyUtil.getChannelToAddress(address, ci);
+            return;
+        }
+
+        if (args[0].equalsIgnoreCase(FTPPasvResponse.COMMAND_STR) ||
+                args[0].equalsIgnoreCase(FTPEpsvResponse.COMMAND_STR)) {
+            Channel ch = ctx.channel();
+            InetAddress clientFacingAddress = ((SocketChannel)ch).localAddress().getAddress();
+            ChannelInitializer<SocketChannel> ci = getFileSendChannelInitializer();
+            ChannelFuture cf = NettyUtil.getListenerChannel(clientFacingAddress, ci);
+            InetSocketAddress localAddress = (InetSocketAddress)cf.channel().localAddress();
+            String response = FTPDataRelayResponse.getRelayResponse(localAddress);
+            ctx.writeAndFlush(response);
+            return;
+        }
+
         ctx.writeAndFlush(GENERIC_RESPONSE_200_STR);
     }
 }

@@ -4,6 +4,7 @@ import four.six.ftproxy.util.Util;
 
 public class FTPEpsvResponse extends FTPDataRelayResponse
 {
+    public static final String COMMAND_STR = "EPSV";
     public static final String RESPONSE_229_STR = "229";
     public static final String RESPONSE_DESC_STR = "Entering Extended Passive Mode";
 

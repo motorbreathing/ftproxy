@@ -24,12 +24,13 @@ public class ServerTests
     TestEchoServer ftpServer;
     TestProxyServer proxyServer;
 
-    public int startEchoServer(boolean ssl) throws Exception
+    public int startEchoServer(String host, boolean ssl) throws Exception
     {
         int p = echoServerPortStart;
         while (p < echoServerPortEnd)
         {
             echoServer = new TestEchoServer();
+            echoServer.setHost(host);
             if (ssl)
                 echoServer.enableSSL();
             echoServer.setPort(p);
@@ -43,12 +44,24 @@ public class ServerTests
         return p;
     }
 
-    public int startFTPServer(boolean ssl) throws Exception
+    public int startEchoServer(boolean ssl) throws Exception
+    {
+        return startEchoServer(Util.THIS_HOST, ssl);
+    }
+
+    public void stopEchoServer()
+    {
+        if (echoServer != null && echoServer.isRunning())
+            echoServer.interrupt();
+    }
+
+    public int startFTPServer(String host, boolean ssl) throws Exception
     {
         int p = ftpServerPortStart;
         while (p < ftpServerPortEnd)
         {
             ftpServer = new TestFTPServer();
+            ftpServer.setHost(host);
             if (ssl)
                 ftpServer.enableSSL();
             ftpServer.setPort(p);
@@ -62,11 +75,9 @@ public class ServerTests
         return p;
     }
 
-
-    public void stopEchoServer()
+    public int startFTPServer(boolean ssl) throws Exception
     {
-        if (echoServer != null && echoServer.isRunning())
-            echoServer.interrupt();
+        return startFTPServer(Util.THIS_HOST, ssl);
     }
 
     public void stopFTPServer()
@@ -75,12 +86,13 @@ public class ServerTests
             ftpServer.interrupt();
     }
 
-    public int startProxyServer(boolean ssl) throws Exception
+    public int startProxyServer(String host, boolean ssl) throws Exception
     {
         int p = proxyServerPortStart;
         while (p < proxyServerPortEnd)
         {
             proxyServer = new TestProxyServer();
+            proxyServer.setHost(host);
             if (ssl)
                 proxyServer.enableSSL();
             proxyServer.setPort(p);
@@ -92,6 +104,11 @@ public class ServerTests
         }
         assertTrue(proxyServer.isRunning());
         return p;
+    }
+
+    public int startProxyServer(boolean ssl) throws Exception
+    {
+        return startProxyServer(Util.THIS_HOST, ssl);
     }
 
     public void stopProxyServer()
@@ -316,10 +333,63 @@ public class ServerTests
             assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
             c.enableDataSSL();
         }
-        c.getFileActiveV4();
-        String received = c.readFile(readTimeoutMillis);
+        String received = c.getFileActiveV4();
         assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
         Util.log("testFTPServerDataActiveV4: " + received);
+        stopFTPServer();
+        c.disconnect();
+    }
+
+    public void testFTPServerDataActiveV6(boolean dataSSL) throws Exception
+    {
+        int ftpServerPort = startFTPServer(Util.LOOPBACK_IPV6, false);
+        TestClient c = new TestClient();
+        c.connect(Util.LOOPBACK_IPV6, ftpServerPort, false);
+        if (dataSSL) {
+            c.requestDataSSL();
+            String resp = c.readLine(readTimeoutMillis);
+            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
+            c.enableDataSSL();
+        }
+        String received = c.getFileActiveV6();
+        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
+        Util.log("testFTPServerDataActiveV6: " + received);
+        stopFTPServer();
+        c.disconnect();
+    }
+
+    public void testFTPServerDataPassiveV4(boolean dataSSL) throws Exception
+    {
+        int ftpServerPort = startFTPServer(false);
+        TestClient c = new TestClient();
+        c.connect(Util.THIS_HOST, ftpServerPort, false);
+        if (dataSSL) {
+            c.requestDataSSL();
+            String resp = c.readLine(readTimeoutMillis);
+            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
+            c.enableDataSSL();
+        }
+        String received = c.getFilePassiveV4();
+        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
+        Util.log("testFTPServerDataPassiveV4: " + received);
+        stopFTPServer();
+        c.disconnect();
+    }
+
+    public void testFTPServerDataPassiveV6(boolean dataSSL) throws Exception
+    {
+        int ftpServerPort = startFTPServer(Util.LOOPBACK_IPV6, false);
+        TestClient c = new TestClient();
+        c.connect(Util.LOOPBACK_IPV6, ftpServerPort, false);
+        if (dataSSL) {
+            c.requestDataSSL();
+            String resp = c.readLine(readTimeoutMillis);
+            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
+            c.enableDataSSL();
+        }
+        String received = c.getFilePassiveV6();
+        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
+        Util.log("testFTPServerDataActiveV6: " + received);
         stopFTPServer();
         c.disconnect();
     }
@@ -327,11 +397,15 @@ public class ServerTests
     public void testFTPServer() throws Exception
     {
         testFTPServerExplicitSSL(false);
-        // Negative test
         testFTPServerExplicitSSL(true);
-        // Test file transfer in Active mode
         testFTPServerDataActiveV4(false);
         testFTPServerDataActiveV4(true);
+        testFTPServerDataActiveV6(false);
+        testFTPServerDataActiveV6(true);
+        testFTPServerDataPassiveV4(false);
+        testFTPServerDataPassiveV4(true);
+        testFTPServerDataPassiveV6(false);
+        testFTPServerDataPassiveV6(true);
     }
 
     @Test

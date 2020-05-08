@@ -90,6 +90,18 @@ public class NettyUtil
     }
 
     public static ChannelFuture
+        getServerChannel(String host, int port, ChannelInitializer<? extends Channel> ci)
+            throws Exception
+    {
+        ServerBootstrap b = getServerBootstrap();
+        if (ci != null)
+            b.childHandler(ci);
+        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        return b.bind(host, port);
+    }
+
+    public static ChannelFuture
         getListenerChannel(InetAddress addr, ChannelInitializer<? extends Channel> ci)
     {
         ServerBootstrap b = getServerBootstrap();

@@ -99,7 +99,7 @@ public class FTPUtil
             s += "2";
         s += Util.PIPE;
         try {
-            s += InetAddress.getByAddress(addr).toString();
+            s += InetAddress.getByAddress(addr).getHostAddress();
         } catch (UnknownHostException e) {
             // This really shouldn't happen...
             return null;

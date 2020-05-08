@@ -10,11 +10,17 @@ import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
 
 abstract class AbstractTestServer extends Thread {
+    private String host = "127.0.0.1";
     private int port = 6666;
     private volatile boolean running = false;
     protected boolean sslStatus = false;
     protected String myName = "Test Server";
     protected Channel ch;
+
+    public void setHost(String host)
+    {
+        this.host = host;
+    }
 
     public void setPort(int port)
     {
@@ -56,8 +62,8 @@ abstract class AbstractTestServer extends Thread {
     {
         try {
             Util.log(myName + ": attempting to start at port " + port);
-            ch = NettyUtil.getServerChannel(port, getTestServerChannelInitializer())
-                     .sync().channel();
+            ch = NettyUtil.getServerChannel(host, port, getTestServerChannelInitializer())
+                          .sync().channel();
             running = true;
             Util.log(myName + ": up and running at port " + port);
             ch.closeFuture().sync();
