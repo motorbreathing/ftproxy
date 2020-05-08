@@ -295,70 +295,38 @@ public class ServerTests {
         c.disconnect();
     }
 
-    public void testFTPServerDataActiveV4(boolean dataSSL) throws Exception {
-        int ftpServerPort = startFTPServer(false);
+    public void testFTPServerData(boolean active, boolean v4, boolean dataSSL) throws Exception {
+        int ftpServerPort = startFTPServer(v4 ? Util.THIS_HOST : Util.LOOPBACK_IPV6, false);
         TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, ftpServerPort, false);
+        c.connect(v4 ? Util.THIS_HOST : Util.LOOPBACK_IPV6, ftpServerPort, false);
         if (dataSSL) {
             c.requestDataSSL();
             String resp = c.readLine(readTimeoutMillis);
             assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
             c.enableDataSSL();
         }
-        String received = c.getFileActiveV4();
+        String received = null;
+        if (active) {
+            received = v4 ? c.getFileActiveV4() : c.getFileActiveV6();
+        } else {
+            received = v4 ? c.getFilePassiveV4() : c.getFilePassiveV6();
+        }
         assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
-        Util.log("testFTPServerDataActiveV4: " + received);
-        stopFTPServer();
-        c.disconnect();
-    }
 
-    public void testFTPServerDataActiveV6(boolean dataSSL) throws Exception {
-        int ftpServerPort = startFTPServer(Util.LOOPBACK_IPV6, false);
-        TestClient c = new TestClient();
-        c.connect(Util.LOOPBACK_IPV6, ftpServerPort, false);
         if (dataSSL) {
-            c.requestDataSSL();
+            c.requestDataClear();
             String resp = c.readLine(readTimeoutMillis);
-            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
-            c.enableDataSSL();
-        }
-        String received = c.getFileActiveV6();
-        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
-        Util.log("testFTPServerDataActiveV6: " + received);
-        stopFTPServer();
-        c.disconnect();
-    }
+            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_C_STR)));
+            c.disableDataSSL();
 
-    public void testFTPServerDataPassiveV4(boolean dataSSL) throws Exception {
-        int ftpServerPort = startFTPServer(false);
-        TestClient c = new TestClient();
-        c.connect(Util.THIS_HOST, ftpServerPort, false);
-        if (dataSSL) {
-            c.requestDataSSL();
-            String resp = c.readLine(readTimeoutMillis);
-            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
-            c.enableDataSSL();
+            if (active) {
+                received = v4 ? c.getFileActiveV4() : c.getFileActiveV6();
+            } else {
+                received = v4 ? c.getFilePassiveV4() : c.getFilePassiveV6();
+            }
+            assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
         }
-        String received = c.getFilePassiveV4();
-        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
-        Util.log("testFTPServerDataPassiveV4: " + received);
-        stopFTPServer();
-        c.disconnect();
-    }
 
-    public void testFTPServerDataPassiveV6(boolean dataSSL) throws Exception {
-        int ftpServerPort = startFTPServer(Util.LOOPBACK_IPV6, false);
-        TestClient c = new TestClient();
-        c.connect(Util.LOOPBACK_IPV6, ftpServerPort, false);
-        if (dataSSL) {
-            c.requestDataSSL();
-            String resp = c.readLine(readTimeoutMillis);
-            assertTrue(resp.equals(TestUtil.withoutCRLF(TestFTPHandler.PROT_RESPONSE_200_P_STR)));
-            c.enableDataSSL();
-        }
-        String received = c.getFilePassiveV6();
-        assertTrue(received.equals(TestFTPHandler.JACKAL_STR));
-        Util.log("testFTPServerDataActiveV6: " + received);
         stopFTPServer();
         c.disconnect();
     }
@@ -366,14 +334,16 @@ public class ServerTests {
     public void testFTPServer() throws Exception {
         testFTPServerExplicitSSL(false);
         testFTPServerExplicitSSL(true);
-        testFTPServerDataActiveV4(false);
-        testFTPServerDataActiveV4(true);
-        testFTPServerDataActiveV6(false);
-        testFTPServerDataActiveV6(true);
-        testFTPServerDataPassiveV4(false);
-        testFTPServerDataPassiveV4(true);
-        testFTPServerDataPassiveV6(false);
-        testFTPServerDataPassiveV6(true);
+
+        testFTPServerData(true, true, false);
+        testFTPServerData(true, false, false);
+        testFTPServerData(true, true, true);
+        testFTPServerData(true, false, true);
+
+        testFTPServerData(false, true, false);
+        testFTPServerData(false, false, false);
+        testFTPServerData(false, true, true);
+        testFTPServerData(false, false, true);
     }
 
     @Test
