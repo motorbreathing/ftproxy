@@ -24,7 +24,10 @@ mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhos
    - The configuration interface is neanderthal at best; do something about
      that
    - Add more tuning options. In fact as of now, there's bloody zilch 
+   - Clean up the logging framework
+   - The coding style needs to toe some standard line and be consistent
+     while at it
 
-7. Go for a long f^&*^# run - without a f*(@%& mask - once this COVID mess clears up.
-   Then, perhaps, since hell would have long frozen over, it would be a good
-   idea to take up ice skating too.
+7. Go for a long flipping run - without a flipping face mask - once this COVID mess
+   clears up. Then, perhaps, since hell would have long frozen over, it might be a
+   good idea to take up ice skating too.
