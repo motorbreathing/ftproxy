@@ -1,23 +1,18 @@
 package four.six.ftproxy.ftp;
 
-import io.netty.channel.ChannelFuture;
-
-import java.net.InetSocketAddress;
 
 import four.six.ftproxy.util.Util;
+import java.net.InetSocketAddress;
 
-public class FTPPortCommand extends FTPDataRelayCommand
-{
+public class FTPPortCommand extends FTPDataRelayCommand {
     public static final String COMMAND_STR = "PORT";
 
-    public FTPPortCommand(String args[], FTPRelayHandler handler)
-    {
+    public FTPPortCommand(String args[], FTPRelayHandler handler) {
         super(args, handler);
         Util.log("FTP PORT command");
     }
 
-    public static String formatCommand(byte[] addr, int port)
-    {
+    public static String formatCommand(byte[] addr, int port) {
         Util.log("FTP PORT command: format: port is " + port);
         String c = COMMAND_STR;
         c += Util.SPACE;
@@ -26,14 +21,12 @@ public class FTPPortCommand extends FTPDataRelayCommand
         return c + Util.CRLF;
     }
 
-    protected InetSocketAddress processPortArgs()
-    {
+    protected InetSocketAddress processPortArgs() {
         String c = String.join(Util.SPACE, args);
         Util.log("About to process FTP PORT Command: " + c);
         c = c.substring(c.indexOf(Util.SPACE) + 1);
         InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(c);
-        if (address == null)
-        {
+        if (address == null) {
             Util.log("Bad address in PORT (" + String.join(Util.SPACE, args) + ")");
             return null;
         }
@@ -41,8 +34,7 @@ public class FTPPortCommand extends FTPDataRelayCommand
     }
 
     @Override
-    public String execute()
-    {
+    public String execute() {
         // We don't issue a response to PORT commands, and instead,
         // get down to the nitty gritties of setting up a data relay
         handler.startActiveRelay(processPortArgs());

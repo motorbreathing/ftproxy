@@ -1,14 +1,13 @@
 package four.six.ftproxy.util;
 
-import junit.framework.*;
-import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
-public class LineProviderTest
-{
+import junit.framework.*;
+import org.junit.Test;
+
+public class LineProviderTest {
     @Test
-    public void doTest1()
-    {
+    public void doTest1() {
         LineProvider lp = new LineProvider();
         assertTrue(lp.getLine() == null);
 

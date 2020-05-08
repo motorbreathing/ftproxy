@@ -1,66 +1,58 @@
 package four.six.ftproxy.netty;
 
-import java.util.ArrayList;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.ssl.SslHandler;
-
-import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import four.six.ftproxy.util.Util;
-import four.six.ftproxy.ssl.SSLHandlerProvider;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 
-abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel>
-{
+abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel> {
     // Child classes can provide all these, if so inclined
     abstract ChannelHandler getDecoder();
+
     abstract ChannelHandler getEncoder();
+
     abstract ChannelHandler getProtocolHandler();
 
     // Default: no SSL
-    public ChannelHandler getSSLHandler(Channel ch)
-    {
+    public ChannelHandler getSSLHandler(Channel ch) {
         return null;
     }
 
     // Installs the default read timeout
-    public ChannelHandler getReadTimeoutHandler()
-    {
+    public ChannelHandler getReadTimeoutHandler() {
         return new ReadTimeoutHandler(Util.READ_TIMEOUT_SECONDS);
     }
 
     @Override
-    public void initChannel(SocketChannel ch) throws Exception
-    {
+    public void initChannel(SocketChannel ch) throws Exception {
         ChannelHandler sslHandler = getSSLHandler(ch);
-        if (sslHandler != null)
-            ch.pipeline().addFirst(sslHandler);
+        if (sslHandler != null) ch.pipeline().addFirst(sslHandler);
 
         ChannelHandler decoder = getDecoder();
-        if (decoder != null);
-            ch.pipeline().addLast(decoder);
+        if (decoder != null)
+            ;
+        ch.pipeline().addLast(decoder);
 
         ChannelHandler encoder = getEncoder();
-        if (encoder != null);
-            ch.pipeline().addLast(encoder);
+        if (encoder != null)
+            ;
+        ch.pipeline().addLast(encoder);
 
         ChannelHandler readTimeoutHandler = getReadTimeoutHandler();
-        if (readTimeoutHandler != null);
-            ch.pipeline().addLast(readTimeoutHandler);
+        if (readTimeoutHandler != null)
+            ;
+        ch.pipeline().addLast(readTimeoutHandler);
 
         ChannelHandler protocolHandler = getProtocolHandler();
-        if (protocolHandler != null)
-            ch.pipeline().addLast(protocolHandler);
+        if (protocolHandler != null) ch.pipeline().addLast(protocolHandler);
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx,
-                                Throwable cause) throws Exception
-    {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Util.log("ChannelInitializer: caught exception");
         cause.printStackTrace();
         ctx.close();

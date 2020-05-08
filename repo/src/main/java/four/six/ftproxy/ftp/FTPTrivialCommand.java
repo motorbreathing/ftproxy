@@ -6,8 +6,7 @@ public class FTPTrivialCommand implements FTPCommand {
     protected String[] args;
     protected FTPRelayHandler handler;
 
-    public FTPTrivialCommand(String args[], FTPRelayHandler h)
-    {
+    public FTPTrivialCommand(String args[], FTPRelayHandler h) {
         this.args = args;
         handler = h;
     }
@@ -15,14 +14,12 @@ public class FTPTrivialCommand implements FTPCommand {
     // The 'default' behavior: pass on a command, unmodified, to the server
     // (eg: "user someuser");
     @Override
-    public String execute()
-    {
+    public String execute() {
         return String.join(Util.SPACE, args) + Util.CRLF;
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return args[0];
     }
 }

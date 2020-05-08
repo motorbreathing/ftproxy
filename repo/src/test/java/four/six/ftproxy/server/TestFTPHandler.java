@@ -1,31 +1,29 @@
 package four.six.ftproxy.server;
 
-import io.netty.channel.Channel;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.buffer.Unpooled;
-import io.netty.buffer.ByteBuf;
-
-import java.nio.charset.Charset;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
+import four.six.ftproxy.ftp.FTPAuthCommand;
+import four.six.ftproxy.ftp.FTPDataRelayResponse;
+import four.six.ftproxy.ftp.FTPEprtCommand;
+import four.six.ftproxy.ftp.FTPEpsvResponse;
+import four.six.ftproxy.ftp.FTPPasvResponse;
+import four.six.ftproxy.ftp.FTPPortCommand;
+import four.six.ftproxy.ftp.FTPProtCommand;
+import four.six.ftproxy.ftp.FTPUtil;
+import four.six.ftproxy.netty.NettyUtil;
 import four.six.ftproxy.ssl.SSLHandlerProvider;
 import four.six.ftproxy.util.Util;
-import four.six.ftproxy.netty.NettyUtil;
-import four.six.ftproxy.ftp.FTPUtil;
-import four.six.ftproxy.ftp.FTPAuthCommand;
-import four.six.ftproxy.ftp.FTPProtCommand;
-import four.six.ftproxy.ftp.FTPPortCommand;
-import four.six.ftproxy.ftp.FTPEprtCommand;
-import four.six.ftproxy.ftp.FTPPasvResponse;
-import four.six.ftproxy.ftp.FTPEpsvResponse;
-import four.six.ftproxy.ftp.FTPDataRelayResponse;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
 
 public class TestFTPHandler extends TestEchoHandler {
 
@@ -39,47 +37,42 @@ public class TestFTPHandler extends TestEchoHandler {
     boolean sslAllowed = true;
     boolean dataSSLEnabled = false;
 
-    public void unimplementSSL()
-    {
+    public void unimplementSSL() {
         sslAllowed = false;
     }
 
-    protected ChannelHandler getFileSendChannelHandler()
-    {
+    protected ChannelHandler getFileSendChannelHandler() {
         return new ChannelInboundHandlerAdapter() {
-                       @Override
-                       public void channelActive(ChannelHandlerContext ctx)
-                           throws Exception
-                       {
-                           Util.log("TestFTPServer: Active mode: connected");
-                           ByteBuf response =
-                               Unpooled.copiedBuffer(JACKAL_STR, charset);
-                           ChannelFuture cf = ctx.writeAndFlush(response);
-                           cf.addListener(new ChannelFutureListener() {
-                               @Override
-                               public void operationComplete(ChannelFuture f) {
-                                   f.channel().close();
-                               }
-                           });
-                        }
-                     };
-    }
-
-    protected ChannelInitializer<SocketChannel> getFileSendChannelInitializer()
-    {
-        ChannelInitializer<SocketChannel> ci =
-            new ChannelInitializer<SocketChannel>() {
             @Override
-            public void initChannel(SocketChannel ch) throws Exception {
-                Util.log("File send: initializing channel");
-                if (dataSSLEnabled) {
-                    Util.log("File send: enabling SSL");
-                    ch.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
-                }
-                ChannelHandler handler = getFileSendChannelHandler();
-                ch.pipeline().addLast(handler);
+            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                Util.log("TestFTPServer: Active mode: connected");
+                ByteBuf response = Unpooled.copiedBuffer(JACKAL_STR, charset);
+                ChannelFuture cf = ctx.writeAndFlush(response);
+                cf.addListener(
+                        new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture f) {
+                                f.channel().close();
+                            }
+                        });
             }
         };
+    }
+
+    protected ChannelInitializer<SocketChannel> getFileSendChannelInitializer() {
+        ChannelInitializer<SocketChannel> ci =
+                new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        Util.log("File send: initializing channel");
+                        if (dataSSLEnabled) {
+                            Util.log("File send: enabling SSL");
+                            ch.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
+                        }
+                        ChannelHandler handler = getFileSendChannelHandler();
+                        ch.pipeline().addLast(handler);
+                    }
+                };
         return ci;
     }
 
@@ -125,13 +118,13 @@ public class TestFTPHandler extends TestEchoHandler {
             return;
         }
 
-        if (args[0].equalsIgnoreCase(FTPPasvResponse.COMMAND_STR) ||
-                args[0].equalsIgnoreCase(FTPEpsvResponse.COMMAND_STR)) {
+        if (args[0].equalsIgnoreCase(FTPPasvResponse.COMMAND_STR)
+                || args[0].equalsIgnoreCase(FTPEpsvResponse.COMMAND_STR)) {
             Channel ch = ctx.channel();
-            InetAddress clientFacingAddress = ((SocketChannel)ch).localAddress().getAddress();
+            InetAddress clientFacingAddress = ((SocketChannel) ch).localAddress().getAddress();
             ChannelInitializer<SocketChannel> ci = getFileSendChannelInitializer();
             ChannelFuture cf = NettyUtil.getListenerChannel(clientFacingAddress, ci);
-            InetSocketAddress localAddress = (InetSocketAddress)cf.channel().localAddress();
+            InetSocketAddress localAddress = (InetSocketAddress) cf.channel().localAddress();
             String response = FTPDataRelayResponse.getRelayResponse(localAddress);
             ctx.writeAndFlush(response);
             return;

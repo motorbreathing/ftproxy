@@ -1,14 +1,11 @@
 package four.six.ftproxy.util;
 
 import java.nio.charset.Charset;
-
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Handler;
-import java.util.logging.ConsoleHandler;
 
-public class Util
-{
+public class Util {
     public static final String UTF8_STR = "UTF-8";
     public static final Charset UTF8charset = Charset.forName(UTF8_STR);
     public static final char LF = '\n';
@@ -41,23 +38,19 @@ public class Util
 
     public static final String LOOPBACK_IPV6 = "::1";
     public static final String LOCAL_HOST = "localhost";
-    public static final String THIS_HOST =
-        System.getProperty(THIS_HOST_KEY, DEFAULT_THIS_HOST_STR);
+    public static final String THIS_HOST = System.getProperty(THIS_HOST_KEY, DEFAULT_THIS_HOST_STR);
     public static final int THIS_PORT =
-        Integer.parseInt(System.getProperty(THIS_PORT_KEY, DEFAULT_THIS_PORT_STR));
+            Integer.parseInt(System.getProperty(THIS_PORT_KEY, DEFAULT_THIS_PORT_STR));
     public static final String REMOTE_HOST =
-        System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
+            System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
     public static final int REMOTE_PORT =
-        Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
-    public static final int SERVER_BACKLOG = 
-        Integer.parseInt(System.getProperty(SERVER_BACKLOG_KEY,
-                                            DEFAULT_SERVER_BACKLOG_STR));
-    public static final int READ_TIMEOUT_SECONDS = 
-        Integer.parseInt(System.getProperty(READ_TIMEOUT_KEY,
-                                            DEFAULT_READ_TIMEOUT_STR));
+            Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
+    public static final int SERVER_BACKLOG =
+            Integer.parseInt(System.getProperty(SERVER_BACKLOG_KEY, DEFAULT_SERVER_BACKLOG_STR));
+    public static final int READ_TIMEOUT_SECONDS =
+            Integer.parseInt(System.getProperty(READ_TIMEOUT_KEY, DEFAULT_READ_TIMEOUT_STR));
     public static final boolean TERMINATE_SSL =
-        Boolean.parseBoolean(System.getProperty(TERMINATE_SSL_KEY,
-                                                DEFAULT_TERMINATE_SSL_STR));
+            Boolean.parseBoolean(System.getProperty(TERMINATE_SSL_KEY, DEFAULT_TERMINATE_SSL_STR));
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -67,13 +60,11 @@ public class Util
     public static final int IPV4_ADDRESS_LENGTH = 4;
     public static final int IPV6_ADDRESS_LENGTH = 16;
 
-    public static String getRemoteHost()
-    {
+    public static String getRemoteHost() {
         return System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
     }
 
-    public static int getRemotePort()
-    {
+    public static int getRemotePort() {
         return Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
     }
 
@@ -85,8 +76,7 @@ public class Util
         logger.addHandler(handler);
     }
 
-    public static void log(String msg)
-    {
+    public static void log(String msg) {
         logger.fine(msg);
     }
 }

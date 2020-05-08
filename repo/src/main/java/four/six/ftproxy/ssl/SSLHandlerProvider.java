@@ -1,13 +1,12 @@
 package four.six.ftproxy.ssl;
 
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.ssl.SslProvider;
+import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.channel.Channel;
-
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLException;
 
@@ -19,16 +18,16 @@ public class SSLHandlerProvider {
         try {
             // Server-side SSL
             SelfSignedCertificate ssc = new SelfSignedCertificate();
-            serverSslContext = SslContextBuilder
-                               .forServer(ssc.certificate(), ssc.privateKey())
-                               .sslProvider(SslProvider.OPENSSL)
-                               .build();
+            serverSslContext =
+                    SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                            .sslProvider(SslProvider.OPENSSL)
+                            .build();
             // Client-side SSL
-            clientSslContext = SslContextBuilder
-                               .forClient()
-                               .sslProvider(SslProvider.OPENSSL)
-                               .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                               .build();
+            clientSslContext =
+                    SslContextBuilder.forClient()
+                            .sslProvider(SslProvider.OPENSSL)
+                            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                            .build();
         } catch (CertificateException certex) {
             certex.printStackTrace();
         } catch (SSLException sslex) {
@@ -36,16 +35,14 @@ public class SSLHandlerProvider {
         }
     }
 
-    public static SslHandler getServerSSLHandler(Channel ch){
-        if (serverSslContext == null)
-            return null;
+    public static SslHandler getServerSSLHandler(Channel ch) {
+        if (serverSslContext == null) return null;
 
         return serverSslContext.newHandler(ch.alloc());
     }
 
-    public static SslHandler getClientSSLHandler(Channel ch){
-        if (clientSslContext == null)
-            return null;
+    public static SslHandler getClientSSLHandler(Channel ch) {
+        if (clientSslContext == null) return null;
 
         return clientSslContext.newHandler(ch.alloc());
     }

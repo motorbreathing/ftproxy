@@ -1,39 +1,28 @@
 package four.six.ftproxy.ftp;
 
+import four.six.ftproxy.netty.NettyUtil;
+import four.six.ftproxy.util.Util;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import four.six.ftproxy.util.Util;
-import four.six.ftproxy.netty.NettyUtil;
-
-public class FTPUtil
-{
+public class FTPUtil {
     public static final String UNRECOGNIZED_COMMAND_STR =
-        "500 Syntax error - command unrecognized\r\n";
-    public static final String UNIMPLEMENTED_COMMAND_STR =
-        "502 error - command unimplemented\r\n";
+            "500 Syntax error - command unrecognized\r\n";
+    public static final String UNIMPLEMENTED_COMMAND_STR = "502 error - command unimplemented\r\n";
 
-    public static ChannelFuture
-        getFTProxyServerChannel() throws Exception
-    {
+    public static ChannelFuture getFTProxyServerChannel() throws Exception {
         return getFTProxyServerChannel(false);
     }
 
-    public static ChannelFuture
-        getFTProxyServerChannel(boolean sslStatus) throws Exception
-    {
+    public static ChannelFuture getFTProxyServerChannel(boolean sslStatus) throws Exception {
         return NettyUtil.getServerChannel(new FTProxyServerChannelInitializer(sslStatus)).sync();
     }
 
-    public static InetSocketAddress processCommaDelimitedV4SocketAddress(String c)
-    {
+    public static InetSocketAddress processCommaDelimitedV4SocketAddress(String c) {
         String[] digits = c.split(Util.REGEX_SPLIT_BY_COMMA);
-        if (digits.length != 6)
-            return null;
+        if (digits.length != 6) return null;
 
         byte[] addr = new byte[4];
         addr[0] = Byte.parseByte(digits[0]);
@@ -53,28 +42,22 @@ public class FTPUtil
     }
 
     // EPRT
-    public static InetSocketAddress processPipeDelimitedSocketAddress(String c)
-    {
+    public static InetSocketAddress processPipeDelimitedSocketAddress(String c) {
         int first = c.indexOf(Util.PIPE);
-        if (first == -1)
-            return null;
+        if (first == -1) return null;
         int second = c.indexOf(Util.PIPE, first + 1);
-        if (second == -1)
-            return null;
+        if (second == -1) return null;
         int third = c.indexOf(Util.PIPE, second + 1);
-        if (third == -1)
-            return null;
+        if (third == -1) return null;
         int fourth = c.indexOf(Util.PIPE, third + 1);
-        if (fourth == -1)
-            return null;
+        if (fourth == -1) return null;
 
         // Phew.
 
         try {
             int port = Integer.parseInt(c.substring(third + 1, fourth));
             Util.log("processPipeDelimitedSocketAddress: port is " + port);
-            if (port == -1)
-                return null;
+            if (port == -1) return null;
             InetAddress addr = InetAddress.getByName(c.substring(second + 1, third));
             Util.log("processPipeDelimitedSocketAddress: addr is " + addr.toString());
             return new InetSocketAddress(addr, port);
@@ -85,18 +68,15 @@ public class FTPUtil
     }
 
     // EPRT
-    public static String formatPipeDelimitedSocketAddress(byte[] addr, int port)
-    {
+    public static String formatPipeDelimitedSocketAddress(byte[] addr, int port) {
         if (addr.length != Util.IPV4_ADDRESS_LENGTH && addr.length != Util.IPV6_ADDRESS_LENGTH) {
             Util.log("FTP format address: bad address (length = " + addr.length + ")");
             return null;
         }
         String s = Util.EMPTYSTRING;
         s += Util.PIPE;
-        if (addr.length == Util.IPV4_ADDRESS_LENGTH)
-            s += "1";
-        else
-            s += "2";
+        if (addr.length == Util.IPV4_ADDRESS_LENGTH) s += "1";
+        else s += "2";
         s += Util.PIPE;
         try {
             s += InetAddress.getByAddress(addr).getHostAddress();
@@ -111,8 +91,7 @@ public class FTPUtil
     }
 
     // PORT, PASV
-    public static String formatCommaDelimitedV4SocketAddress(byte[] addr, int port)
-    {
+    public static String formatCommaDelimitedV4SocketAddress(byte[] addr, int port) {
         String s = Util.EMPTYSTRING;
         s += addr[0];
         s += Util.COMMA;
@@ -129,15 +108,12 @@ public class FTPUtil
     }
 
     // EPSV
-    public static int processPipeDelimitedV6SocketAddress(String c)
-    {
+    public static int processPipeDelimitedV6SocketAddress(String c) {
         int lastindex = c.lastIndexOf(Util.PIPE);
-        if (lastindex == -1)
-            return -1;
+        if (lastindex == -1) return -1;
         int nextindex = c.lastIndexOf(Util.PIPE, lastindex - 1);
-        if (nextindex == -1)
-            return -1;
-        try  {
+        if (nextindex == -1) return -1;
+        try {
             return Integer.parseInt(c.substring(nextindex + 1, lastindex));
         } catch (NumberFormatException e) {
             return -1;

@@ -1,17 +1,14 @@
 package four.six.ftproxy.server;
 
-import io.netty.channel.ChannelHandler;
 
 public class TestFTPServer extends TestEchoServer {
-    private final static String myName = "Test FTP Server";
+    private static final String myName = "Test FTP Server";
 
-    public TestFTPServer()
-    {
+    public TestFTPServer() {
         setMyName(myName);
     }
 
-    protected TestEchoHandler createProtocolHandler()
-    {
+    protected TestEchoHandler createProtocolHandler() {
         return new TestFTPHandler();
     }
 }

@@ -3,9 +3,7 @@ package four.six.ftproxy.ftp;
 import four.six.ftproxy.util.Util;
 
 public class FTPCommandFactory {
-    public static FTPCommand getCommand(String line,
-                                        FTPRelayHandler handler)
-    {
+    public static FTPCommand getCommand(String line, FTPRelayHandler handler) {
         String[] args = line.split(Util.REGEX_SPLIT_BY_SPACES);
 
         if (args[0].equalsIgnoreCase(FTPAuthCommand.COMMAND_STR))
@@ -23,4 +21,5 @@ public class FTPCommandFactory {
         // The simple default
         return new FTPTrivialCommand(args, handler);
     }
-};
+}
+;
