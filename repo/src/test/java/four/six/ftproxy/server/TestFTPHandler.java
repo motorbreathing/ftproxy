@@ -25,7 +25,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
-public class TestFTPHandler extends TestEchoHandler {
+public class TestFTPHandler extends TestSimpleHandler {
 
     public static final String GENERIC_RESPONSE_200_STR = "200 Generic Approval\r\n";
     public static final String PROT_RESPONSE_200_C_STR = "200 Protection level set to C\r\n";

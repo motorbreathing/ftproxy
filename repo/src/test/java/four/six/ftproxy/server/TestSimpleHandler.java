@@ -5,13 +5,13 @@ import four.six.ftproxy.util.Util;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
+public class TestSimpleHandler extends SimpleChannelInboundHandler<String> {
 
     private ChannelHandlerContext ctx;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Util.log("TestEchoHandler: channel active");
+        Util.log("TestSimpleHandler: channel active");
         this.ctx = ctx;
     }
 
@@ -22,7 +22,7 @@ public class TestEchoHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception {
-        Util.log("TestEchoHandler: read: " + incoming);
+        Util.log("TestSimpleHandler: read: " + incoming);
         process(ctx, incoming);
     }
 

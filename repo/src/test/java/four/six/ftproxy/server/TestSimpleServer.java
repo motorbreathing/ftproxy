@@ -7,16 +7,16 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 
-public class TestEchoServer extends AbstractTestServer {
-    private static final String myName = "Test Echo Server";
-    private final TestEchoHandler handler = createProtocolHandler();
+public class TestSimpleServer extends AbstractTestServer {
+    private static final String myName = "Test Simple Server";
+    private final TestSimpleHandler handler = createProtocolHandler();
 
-    public TestEchoServer() {
+    public TestSimpleServer() {
         setMyName(myName);
     }
 
-    protected TestEchoHandler createProtocolHandler() {
-        return new TestEchoHandler();
+    protected TestSimpleHandler createProtocolHandler() {
+        return new TestSimpleHandler();
     }
 
     protected ChannelHandler getProtocolHandler() {
@@ -34,14 +34,14 @@ public class TestEchoServer extends AbstractTestServer {
 
             @Override
             public ChannelHandler getProtocolHandler() {
-                return TestEchoServer.this.getProtocolHandler();
+                return TestSimpleServer.this.getProtocolHandler();
             }
         };
     }
 
     void enableExplicitSSL() {
         if (handler == null) {
-            Util.log("Warning: TextEchoServer: handling missing, can't enable SSL");
+            Util.log("Warning: TextSimpleServer: handling missing, can't enable SSL");
             return;
         }
         handler.enableExplicitSSL();
