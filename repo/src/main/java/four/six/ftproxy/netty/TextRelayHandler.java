@@ -86,7 +86,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
         // Flush any data that has already arrived from client-side
-        if (clientData.getStashedString() != null) flushToServer();
+        if (clientData.getStashedString() != null)
+            flushToServer();
     }
 
     // Process a new incoming client connection
@@ -103,8 +104,10 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        if (clientCtx == null) clientActive(ctx);
-        else serverActive(ctx);
+        if (clientCtx == null)
+            clientActive(ctx);
+        else
+            serverActive(ctx);
     }
 
     @Override
@@ -126,21 +129,25 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public boolean clientSSLEnabled() {
-        if (clientCtx == null) return false;
+        if (clientCtx == null)
+            return false;
         ChannelHandler first = clientCtx.pipeline().first();
         return first instanceof SslHandler;
     }
 
     public boolean serverSSLEnabled() {
-        if (serverCtx == null) return false;
+        if (serverCtx == null)
+            return false;
         ChannelHandler first = serverCtx.pipeline().first();
         return first instanceof SslHandler;
     }
 
     public void enableClientSSL() {
-        if (clientCtx == null) return; // This should not happen
+        if (clientCtx == null)
+            return; // This should not happen
 
-        if (clientSSLEnabled()) return;
+        if (clientSSLEnabled())
+            return;
 
         clientCtx.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(clientCtx.channel()));
     }
@@ -149,17 +156,21 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
         Util.log("Enabling Server-side SSL");
         serverSSL = true;
 
-        if (serverCtx == null) return;
+        if (serverCtx == null)
+            return;
 
-        if (serverSSLEnabled()) return;
+        if (serverSSLEnabled())
+            return;
 
         serverCtx.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(serverCtx.channel()));
     }
 
     public void enableSSL(Object origin) {
         ChannelHandlerContext ctx = (ChannelHandlerContext) origin;
-        if (ctx == clientCtx) enableClientSSL();
-        else enableServerSSL();
+        if (ctx == clientCtx)
+            enableClientSSL();
+        else
+            enableServerSSL();
     }
 
     public void clientRead(String incoming) throws Exception {
@@ -178,15 +189,20 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     public void replyToOrigin(String line, Object origin) {
         ChannelHandlerContext ctx = (ChannelHandlerContext) origin;
-        if (ctx == clientCtx || ctx == serverCtx) ctx.writeAndFlush(line);
-        else throw new IllegalStateException("replyToOrigin: unknown channel handler context");
+        if (ctx == clientCtx || ctx == serverCtx)
+            ctx.writeAndFlush(line);
+        else
+            throw new IllegalStateException("replyToOrigin: unknown channel handler context");
     }
 
     public void relayToPeer(String line, Object origin) {
         ChannelHandlerContext ctx = (ChannelHandlerContext) origin;
-        if (ctx == clientCtx) serverCtx.writeAndFlush(line);
-        else if (ctx == serverCtx) clientCtx.writeAndFlush(line);
-        else throw new IllegalStateException("relayToPeer: unknown channel handler context");
+        if (ctx == clientCtx)
+            serverCtx.writeAndFlush(line);
+        else if (ctx == serverCtx)
+            clientCtx.writeAndFlush(line);
+        else
+            throw new IllegalStateException("relayToPeer: unknown channel handler context");
     }
 
     public String processCommand(String line) {
@@ -225,7 +241,8 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void flushToServer() {
         while (true) {
             String line = clientData.getLine();
-            if (line == null) break;
+            if (line == null)
+                break;
             Util.log("[from client] " + line);
             processCommandAndWrite(line);
         }
@@ -234,16 +251,20 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void flushToClient() {
         while (true) {
             String line = serverData.getLine();
-            if (line == null) break;
+            if (line == null)
+                break;
             Util.log("[from server] " + line);
             processResponseAndWrite(line);
         }
     }
 
     private void chooseRead(ChannelHandlerContext ctx, String incoming) throws Exception {
-        if (ctx == serverCtx) serverRead(incoming);
-        else if (ctx == clientCtx) clientRead(incoming);
-        else throw new IllegalStateException("chooseRead: unknown channel handler context");
+        if (ctx == serverCtx)
+            serverRead(incoming);
+        else if (ctx == clientCtx)
+            clientRead(incoming);
+        else
+            throw new IllegalStateException("chooseRead: unknown channel handler context");
     }
 
     @Override

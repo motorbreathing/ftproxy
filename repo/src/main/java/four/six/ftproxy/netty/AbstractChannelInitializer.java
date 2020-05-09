@@ -30,25 +30,24 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
         ChannelHandler sslHandler = getSSLHandler(ch);
-        if (sslHandler != null) ch.pipeline().addFirst(sslHandler);
+        if (sslHandler != null)
+            ch.pipeline().addFirst(sslHandler);
 
         ChannelHandler decoder = getDecoder();
         if (decoder != null)
-            ;
-        ch.pipeline().addLast(decoder);
+            ch.pipeline().addLast(decoder);
 
         ChannelHandler encoder = getEncoder();
         if (encoder != null)
-            ;
-        ch.pipeline().addLast(encoder);
+            ch.pipeline().addLast(encoder);
 
         ChannelHandler readTimeoutHandler = getReadTimeoutHandler();
         if (readTimeoutHandler != null)
-            ;
-        ch.pipeline().addLast(readTimeoutHandler);
+            ch.pipeline().addLast(readTimeoutHandler);
 
         ChannelHandler protocolHandler = getProtocolHandler();
-        if (protocolHandler != null) ch.pipeline().addLast(protocolHandler);
+        if (protocolHandler != null)
+            ch.pipeline().addLast(protocolHandler);
     }
 
     @Override

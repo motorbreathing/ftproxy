@@ -41,7 +41,8 @@ public class NettyUtil {
             String host, int port, ChannelInitializer<? extends Channel> ci) {
         Bootstrap b = getClientBootstrap();
         b.option(ChannelOption.SO_KEEPALIVE, true);
-        if (ci != null) b.handler(ci);
+        if (ci != null)
+            b.handler(ci);
         return b.connect(host, port);
     }
 
@@ -49,7 +50,8 @@ public class NettyUtil {
             InetSocketAddress address, ChannelInitializer<? extends Channel> ci) {
         Bootstrap b = getClientBootstrap();
         b.option(ChannelOption.SO_KEEPALIVE, true);
-        if (ci != null) b.handler(ci);
+        if (ci != null)
+            b.handler(ci);
         return b.connect(address);
     }
 
@@ -61,7 +63,8 @@ public class NettyUtil {
     public static ChannelFuture getServerChannel(int port, ChannelInitializer<? extends Channel> ci)
             throws Exception {
         ServerBootstrap b = getServerBootstrap();
-        if (ci != null) b.childHandler(ci);
+        if (ci != null)
+            b.childHandler(ci);
         b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         return b.bind(port);
@@ -70,7 +73,8 @@ public class NettyUtil {
     public static ChannelFuture getServerChannel(
             String host, int port, ChannelInitializer<? extends Channel> ci) throws Exception {
         ServerBootstrap b = getServerBootstrap();
-        if (ci != null) b.childHandler(ci);
+        if (ci != null)
+            b.childHandler(ci);
         b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         return b.bind(host, port);
@@ -79,7 +83,8 @@ public class NettyUtil {
     public static ChannelFuture getListenerChannel(
             InetAddress addr, ChannelInitializer<? extends Channel> ci) {
         ServerBootstrap b = getServerBootstrap();
-        if (ci != null) b.childHandler(ci);
+        if (ci != null)
+            b.childHandler(ci);
         b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         for (int p = Util.dataPortMin; p <= Util.dataPortMax; p++) {

@@ -191,7 +191,8 @@ public class TestClient {
     }
 
     public String getFilePassiveV4() throws Exception {
-        if (ch == null) throw new IllegalStateException();
+        if (ch == null)
+            throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
             Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V4 relay");
@@ -199,7 +200,8 @@ public class TestClient {
         }
         write("PASV\r\n");
         String c = readLine(readTimeoutMillis);
-        if (c == null) return null;
+        if (c == null)
+            return null;
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
         resetFileContents();
         InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(c);
@@ -208,7 +210,8 @@ public class TestClient {
     }
 
     public String getFilePassiveV6() throws Exception {
-        if (ch == null) throw new IllegalStateException();
+        if (ch == null)
+            throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
             Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
@@ -216,7 +219,8 @@ public class TestClient {
         }
         write("EPSV\r\n");
         String c = readLine(readTimeoutMillis);
-        if (c == null) return null;
+        if (c == null)
+            return null;
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
         Util.log("EPSV response is: " + c);
         resetFileContents();
@@ -226,7 +230,8 @@ public class TestClient {
     }
 
     public String getFileActiveV4() throws Exception {
-        if (ch == null) throw new IllegalStateException();
+        if (ch == null)
+            throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
             Util.log("Invalid address (length = " + addr.getAddress().length + ")for Active V4 relay");
@@ -240,7 +245,8 @@ public class TestClient {
     }
 
     public String getFileActiveV6() throws Exception {
-        if (ch == null) throw new IllegalStateException();
+        if (ch == null)
+            throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
             Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
@@ -271,7 +277,9 @@ public class TestClient {
     }
 
     public void enableSSL() {
-        if (ch != null) ch.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
-        else Util.log("Warning: enableSSL() failed for client");
+        if (ch != null)
+            ch.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
+        else
+            Util.log("Warning: enableSSL() failed for client");
     }
 }

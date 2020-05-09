@@ -36,7 +36,8 @@ abstract class AbstractTestServer extends Thread {
     protected abstract ChannelInitializer<? extends Channel> getTestServerChannelInitializer();
 
     public void enableSSL() {
-        if (running) Util.log("Warning: server is already running; enableSSL() is no-op");
+        if (running)
+            Util.log("Warning: server is already running; enableSSL() is no-op");
 
         sslStatus = true;
     }

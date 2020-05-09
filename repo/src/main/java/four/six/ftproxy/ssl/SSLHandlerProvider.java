@@ -36,13 +36,15 @@ public class SSLHandlerProvider {
     }
 
     public static SslHandler getServerSSLHandler(Channel ch) {
-        if (serverSslContext == null) return null;
+        if (serverSslContext == null)
+            return null;
 
         return serverSslContext.newHandler(ch.alloc());
     }
 
     public static SslHandler getClientSSLHandler(Channel ch) {
-        if (clientSslContext == null) return null;
+        if (clientSslContext == null)
+            return null;
 
         return clientSslContext.newHandler(ch.alloc());
     }

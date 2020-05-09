@@ -27,7 +27,8 @@ public class FTPRelayHandler extends TextRelayHandler {
     @Override
     public String processCommand(String line) {
         line = line.trim();
-        if (line.length() > 0) return FTPCommandFactory.getCommand(line, this).execute();
+        if (line.length() > 0)
+            return FTPCommandFactory.getCommand(line, this).execute();
 
         return null;
     }
@@ -35,30 +36,35 @@ public class FTPRelayHandler extends TextRelayHandler {
     @Override
     public String processResponse(String line) {
         line = line.trim();
-        if (line.length() > 0) return FTPResponseFactory.getResponse(line, this).process();
+        if (line.length() > 0)
+            return FTPResponseFactory.getResponse(line, this).process();
 
         return null;
     }
 
     private ChannelInitializer<? extends Channel> getChannelInitializer(
             ChannelHandler handler, boolean sslEnabled, boolean client) {
-        if (sslEnabled) Util.log("Setting up data connection with SSL enabled");
-        else Util.log("Setting up data connection with SSL disabled");
+        if (sslEnabled)
+            Util.log("Setting up data connection with SSL enabled");
+        else
+            Util.log("Setting up data connection with SSL disabled");
 
         DataRelayChannelInitializer ci =
                 new DataRelayChannelInitializer() {
                     @Override
                     public ChannelHandler getSSLHandler(Channel ch) {
-                        if (!sslEnabled) return null;
-                        else if (client) return SSLHandlerProvider.getClientSSLHandler(ch);
-                        else return SSLHandlerProvider.getServerSSLHandler(ch);
+                        if (!sslEnabled)
+                            return null;
+                        else if (client)
+                            return SSLHandlerProvider.getClientSSLHandler(ch);
+                        else
+                            return SSLHandlerProvider.getServerSSLHandler(ch);
                     }
 
                     @Override
                     public ChannelHandler getProtocolHandler() {
                         return handler;
                     }
-                    ;
                 };
         return ci;
     }
@@ -151,7 +157,8 @@ public class FTPRelayHandler extends TextRelayHandler {
                 new DataRelayHandler() {
                     @Override
                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                        if (oneCtx == null) finishPassiveRelay(this, addr);
+                        if (oneCtx == null)
+                            finishPassiveRelay(this, addr);
                         initContext(ctx);
                     }
                 };
@@ -177,14 +184,17 @@ public class FTPRelayHandler extends TextRelayHandler {
 
     // EPSV
     public void startPassiveRelay(int port) {
-        if (port > 0) startPassiveRelay(new InetSocketAddress(serverFacingAddress, port));
-        else Util.log("Passive relay: invalid port specified by remote server");
+        if (port > 0)
+            startPassiveRelay(new InetSocketAddress(serverFacingAddress, port));
+        else
+            Util.log("Passive relay: invalid port specified by remote server");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
         Util.log("FTPRelayHandler: removed");
-        for (DataRelayHandler handler : aliveDataSessions) handler.closeSession();
+        for (DataRelayHandler handler : aliveDataSessions)
+            handler.closeSession();
         aliveDataSessions.clear();
         super.handlerRemoved(ctx);
     }

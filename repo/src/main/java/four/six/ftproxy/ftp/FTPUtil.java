@@ -57,7 +57,8 @@ public class FTPUtil {
         try {
             int port = Integer.parseInt(c.substring(third + 1, fourth));
             Util.log("processPipeDelimitedSocketAddress: port is " + port);
-            if (port == -1) return null;
+            if (port == -1)
+                return null;
             InetAddress addr = InetAddress.getByName(c.substring(second + 1, third));
             Util.log("processPipeDelimitedSocketAddress: addr is " + addr.toString());
             return new InetSocketAddress(addr, port);
@@ -110,9 +111,11 @@ public class FTPUtil {
     // EPSV
     public static int processPipeDelimitedV6SocketAddress(String c) {
         int lastindex = c.lastIndexOf(Util.PIPE);
-        if (lastindex == -1) return -1;
+        if (lastindex == -1)
+            return -1;
         int nextindex = c.lastIndexOf(Util.PIPE, lastindex - 1);
-        if (nextindex == -1) return -1;
+        if (nextindex == -1)
+            return -1;
         try {
             return Integer.parseInt(c.substring(nextindex + 1, lastindex));
         } catch (NumberFormatException e) {

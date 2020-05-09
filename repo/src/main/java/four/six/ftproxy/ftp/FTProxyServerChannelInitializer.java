@@ -31,13 +31,15 @@ public class FTProxyServerChannelInitializer extends TextRelayChannelInitializer
 
     @Override
     public ChannelHandler getProtocolHandler() {
-        if (handler == null) return new FTPRelayHandler();
+        if (handler == null)
+            return new FTPRelayHandler();
         return handler;
     }
 
     @Override
     public ChannelHandler getSSLHandler(Channel ch) {
-        if (sslEnabled) return SSLHandlerProvider.getServerSSLHandler(ch);
+        if (sslEnabled)
+            return SSLHandlerProvider.getServerSSLHandler(ch);
 
         return null;
     }

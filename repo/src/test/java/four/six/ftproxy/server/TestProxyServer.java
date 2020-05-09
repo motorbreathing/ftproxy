@@ -18,7 +18,8 @@ public class TestProxyServer extends AbstractTestServer {
     @Override
     protected ChannelInitializer<? extends Channel> getTestServerChannelInitializer() {
         // If we have an already-setup ftp channel initializer...
-        if (ftpServerChannelInitializer != null) return ftpServerChannelInitializer;
+        if (ftpServerChannelInitializer != null)
+            return ftpServerChannelInitializer;
 
         handler = new FTPRelayHandler();
         ftpServerChannelInitializer = new FTProxyServerChannelInitializer(handler, sslStatus);
@@ -26,7 +27,8 @@ public class TestProxyServer extends AbstractTestServer {
     }
 
     private FTPRelayHandler getHandler() {
-        if (handler != null) return handler;
+        if (handler != null)
+            return handler;
         if (ftpServerChannelInitializer == null)
             ftpServerChannelInitializer = new FTProxyServerChannelInitializer(sslStatus);
         return (FTPRelayHandler) ftpServerChannelInitializer.getProtocolHandler();

@@ -42,9 +42,12 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (ctx == oneCtx) otherCtx.writeAndFlush(msg);
-        else if (ctx == otherCtx) oneCtx.writeAndFlush(msg);
-        else throw new IllegalStateException("DataRelayHandler: unknown context from read");
+        if (ctx == oneCtx)
+            otherCtx.writeAndFlush(msg);
+        else if (ctx == otherCtx)
+            oneCtx.writeAndFlush(msg);
+        else
+            throw new IllegalStateException("DataRelayHandler: unknown context from read");
     }
 
     @Override

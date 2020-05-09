@@ -31,11 +31,13 @@ public class LineProvider {
 
     public String getLine() {
         // No stashed data?
-        if (stash.length() == 0) return null;
+        if (stash.length() == 0)
+            return null;
 
         int index = stash.indexOf(Util.LF);
         // Have stashed data, but yet to see a newline
-        if (index < 0) return null;
+        if (index < 0)
+            return null;
 
         String result = Util.EMPTYSTRING;
         if (index > 0) {
@@ -43,9 +45,10 @@ public class LineProvider {
             result = stash.substring(0, index);
             if (result.charAt(result.length() - 1) == Util.CR) {
                 // All we had before the newline was a carriage return!
-                if (result.length() == 1) result = Util.EMPTYSTRING;
+                if (result.length() == 1)
+                    result = Util.EMPTYSTRING;
                 else // Lose the carriage return as well
-                result = result.substring(0, result.length() - 1);
+                    result = result.substring(0, result.length() - 1);
             }
         }
 
@@ -58,7 +61,8 @@ public class LineProvider {
             stash = Util.EMPTYSTRING;
         }
 
-        if (result.length() > 0) return result;
+        if (result.length() > 0)
+            return result;
 
         return null;
     }
