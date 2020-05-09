@@ -256,11 +256,40 @@ public class ServerTests {
         c.disconnect();
     }
 
+    public void testProxyServerSSLTermination() throws Exception {
+        // SSL is disabled all around, initially
+        int simpleServerPort = startSimpleServer(false);
+        Util.setRemotePort(simpleServerPort);
+        int proxyServerPort = startProxyServer(false);
+        TestClient c = new TestClient();
+        c.connect(Util.THIS_HOST, proxyServerPort, false);
+        String s1 = "hello";
+        c.write(s1 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(s1));
+
+        Util.setSSLTermination(true);
+        c.requestExplicitSSL();
+        assertTrue(
+                c.readLine(readTimeoutMillis).equals(TestUtil.withoutCRLF(FTPAuthCommand.RESPONSE_STR)));
+
+        c.enableSSL();
+
+        // Further communication is secure
+        String s2 = "securehello";
+        c.write(s2 + Util.CRLF);
+        assertTrue(c.readLine(readTimeoutMillis).equals(s2));
+
+        stopSimpleServer();
+        stopProxyServer();
+        c.disconnect();
+    }
+
     public void testProxyServer() throws Exception {
         testProxyServerSSL(true, true, true);
         testProxyServerSSL(false, false, true);
         testProxyServerSSL(true, true, false);
         testProxyServerExplicitSSL();
+        testProxyServerSSLTermination();
     }
 
     public void testFTPServerExplicitSSL(boolean negativeTest) throws Exception {
