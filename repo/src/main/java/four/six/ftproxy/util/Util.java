@@ -70,6 +70,8 @@ public class Util {
     public static final int IPV6_ADDRESS_LENGTH = 16;
 
     static {
+        setupLogging();
+
         defaultProperties = new Properties();
         defaultProperties.setProperty(THIS_HOST_KEY, THIS_HOST);
         defaultProperties.setProperty(THIS_PORT_KEY, Integer.toString(THIS_PORT));
@@ -80,6 +82,14 @@ public class Util {
         defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
         configProperties = new Properties(defaultProperties);
         loadConfigFromFile(CONFIG_FILENAME);
+    }
+
+    private static void setupLogging() {
+        logger.setLevel(Level.FINE);
+        logger.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINE);
+        logger.addHandler(handler);
     }
 
     public static String getRemoteHost() {
@@ -108,14 +118,6 @@ public class Util {
             return false;
         }
         return true;
-    }
-
-    static {
-        logger.setLevel(Level.FINE);
-        logger.setUseParentHandlers(false);
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINE);
-        logger.addHandler(handler);
     }
 
     public static void log(String msg) {
