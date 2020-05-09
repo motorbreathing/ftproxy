@@ -96,8 +96,16 @@ public class Util {
         return configProperties.getProperty(REMOTE_HOST_KEY);
     }
 
+    public static void setRemoteHost(String remoteHost) {
+        setConfigProperty(REMOTE_HOST_KEY, remoteHost);
+    }
+
     public static int getRemotePort() {
         return Integer.parseInt(configProperties.getProperty(REMOTE_PORT_KEY));
+    }
+
+    public static void setRemotePort(int port) {
+        setConfigProperty(REMOTE_PORT_KEY, Integer.toString(port));
     }
 
     public static boolean getSSLTermination()
