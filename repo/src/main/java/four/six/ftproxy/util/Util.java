@@ -1,11 +1,20 @@
 package four.six.ftproxy.util;
 
 import java.nio.charset.Charset;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Properties;
 
 public class Util {
+    private static Properties defaultProperties;
+    private static Properties configProperties;
+
+    public static final String APPNAME = "ftproxy";
+    public static final String CONFIG_FILENAME = APPNAME + ".properties";
+
     public static final String UTF8_STR = "UTF-8";
     public static final Charset UTF8charset = Charset.forName(UTF8_STR);
     public static final char LF = '\n';
@@ -60,12 +69,45 @@ public class Util {
     public static final int IPV4_ADDRESS_LENGTH = 4;
     public static final int IPV6_ADDRESS_LENGTH = 16;
 
+    static {
+        defaultProperties = new Properties();
+        defaultProperties.setProperty(THIS_HOST_KEY, THIS_HOST);
+        defaultProperties.setProperty(THIS_PORT_KEY, Integer.toString(THIS_PORT));
+        defaultProperties.setProperty(REMOTE_HOST_KEY, REMOTE_HOST);
+        defaultProperties.setProperty(REMOTE_PORT_KEY, Integer.toString(REMOTE_PORT));
+        defaultProperties.setProperty(SERVER_BACKLOG_KEY, Integer.toString(SERVER_BACKLOG));
+        defaultProperties.setProperty(READ_TIMEOUT_KEY, Integer.toString(READ_TIMEOUT_SECONDS));
+        defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
+        configProperties = new Properties(defaultProperties);
+        loadConfigFromFile(CONFIG_FILENAME);
+    }
+
     public static String getRemoteHost() {
-        return System.getProperty(REMOTE_HOST_KEY, DEFAULT_REMOTE_HOST_STR);
+        return configProperties.getProperty(REMOTE_HOST_KEY);
     }
 
     public static int getRemotePort() {
-        return Integer.parseInt(System.getProperty(REMOTE_PORT_KEY, DEFAULT_REMOTE_PORT_STR));
+        return Integer.parseInt(configProperties.getProperty(REMOTE_PORT_KEY));
+    }
+
+    public static void setConfigProperty(String key, String value) {
+        configProperties.setProperty(key, value);
+    }
+
+    public static boolean loadConfigFromFile(String filename) {
+        File f = new File(filename);
+        if (!f.exists() || !f.canRead()) {
+            Util.log("Unable to access config file: " + filename);
+            return false;
+        }
+
+        try {
+            configProperties.load(new FileInputStream(f));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     static {

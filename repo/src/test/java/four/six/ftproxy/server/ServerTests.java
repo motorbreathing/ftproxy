@@ -207,7 +207,7 @@ public class ServerTests {
             boolean clientSSLEnabled, boolean proxySSLEnabled, boolean serverSSLEnabled)
             throws Exception {
         int simpleServerPort = startSimpleServer(serverSSLEnabled);
-        System.setProperty(Util.REMOTE_PORT_KEY, Integer.toString(simpleServerPort));
+        Util.setConfigProperty(Util.REMOTE_PORT_KEY, Integer.toString(simpleServerPort));
         int proxyServerPort = startProxyServer(proxySSLEnabled);
         if (serverSSLEnabled) proxyServer.enableServerSSL();
         TestClient c = new TestClient();
@@ -232,7 +232,7 @@ public class ServerTests {
     public void testProxyServerExplicitSSL() throws Exception {
         // SSL is disabled all around, initially
         int simpleServerPort = startSimpleServer(false);
-        System.setProperty(Util.REMOTE_PORT_KEY, Integer.toString(simpleServerPort));
+        Util.setConfigProperty(Util.REMOTE_PORT_KEY, Integer.toString(simpleServerPort));
         int proxyServerPort = startProxyServer(false);
         TestClient c = new TestClient();
         c.connect(Util.THIS_HOST, proxyServerPort, false);
