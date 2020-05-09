@@ -100,7 +100,17 @@ public class Util {
         return Integer.parseInt(configProperties.getProperty(REMOTE_PORT_KEY));
     }
 
-    public static void setConfigProperty(String key, String value) {
+    public static boolean getSSLTermination()
+    {
+        return Boolean.parseBoolean(configProperties.getProperty(TERMINATE_SSL_KEY));
+    }
+
+    public static void setSSLTermination(boolean f)
+    {
+        setConfigProperty(TERMINATE_SSL_KEY, Boolean.toString(f));
+    }
+
+    private static void setConfigProperty(String key, String value) {
         configProperties.setProperty(key, value);
     }
 
