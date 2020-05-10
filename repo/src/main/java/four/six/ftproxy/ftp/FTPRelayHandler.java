@@ -22,6 +22,7 @@ public class FTPRelayHandler extends TextRelayHandler {
     private boolean controlSSLRequested = false;
     private boolean controlSSLEnabled = false;
     private boolean dataSSLRequested = false;
+    private boolean dataSSLDisableRequested = false;
     private boolean dataSSLEnabled = false;
 
     @Override
@@ -157,9 +158,10 @@ public class FTPRelayHandler extends TextRelayHandler {
                 new DataRelayHandler() {
                     @Override
                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                        if (oneCtx == null)
-                            finishPassiveRelay(this, addr);
+                        boolean isClientChannel = clientCtx == null;
                         initContext(ctx);
+                        if (isClientChannel)
+                            finishPassiveRelay(this, addr);
                     }
                 };
         ChannelInitializer<? extends Channel> ci =
@@ -218,6 +220,14 @@ public class FTPRelayHandler extends TextRelayHandler {
 
     public void dataSSLRequested(boolean f) {
         dataSSLRequested = f;
+    }
+
+    public boolean dataSSLDisableRequested() {
+        return dataSSLDisableRequested;
+    }
+
+    public void dataSSLDisableRequested(boolean f) {
+        dataSSLDisableRequested = f;
     }
 
     public boolean dataSSLEnabled() {

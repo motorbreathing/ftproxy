@@ -11,7 +11,10 @@ public class FTPProtCommand extends FTPTrivialCommand {
     public String execute() {
         if (args[1].equalsIgnoreCase("P")) {
             handler.dataSSLRequested(true);
+        } else if (args[1].equalsIgnoreCase("C")) {
+            handler.dataSSLDisableRequested(true);
         }
+
         return super.execute();
     }
 }

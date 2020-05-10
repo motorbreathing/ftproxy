@@ -12,6 +12,9 @@ public class FTPOkResponse extends FTPTrivialResponse {
         if (handler.dataSSLRequested()) {
             handler.dataSSLRequested(false);
             handler.dataSSLEnabled(true);
+        } else if (handler.dataSSLDisableRequested()) {
+            handler.dataSSLDisableRequested(false);
+            handler.dataSSLEnabled(false);
         }
 
         return super.process();

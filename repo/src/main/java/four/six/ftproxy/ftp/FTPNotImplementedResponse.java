@@ -14,6 +14,9 @@ public class FTPNotImplementedResponse extends FTPTrivialResponse {
         if (handler.dataSSLRequested()) {
             Util.log("Server turned down TLS/SSL request on data channels");
             handler.dataSSLRequested(false);
+        } else if (handler.dataSSLDisableRequested()) {
+            Util.log("Server turned down TLS/SSL disable request on data channels");
+            handler.dataSSLDisableRequested(false);
         } else if (handler.controlSSLRequested()) {
             Util.log("Server turned down TLS/SSL request on control channel");
             handler.controlSSLRequested(false);

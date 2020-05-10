@@ -45,7 +45,7 @@ public class TestFTPHandler extends TestSimpleHandler {
         return new ChannelInboundHandlerAdapter() {
             @Override
             public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                Util.log("TestFTPServer: Active mode: connected");
+                Util.log("TestFTPServer: data channel connected");
                 ByteBuf response = Unpooled.copiedBuffer(JACKAL_STR, charset);
                 ChannelFuture cf = ctx.writeAndFlush(response);
                 cf.addListener(
