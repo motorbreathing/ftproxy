@@ -7,11 +7,15 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 @Sharable
 public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     protected ChannelHandlerContext clientCtx = null;
     protected ChannelHandlerContext serverCtx = null;
+    protected ChannelFuture lastClientWriteFuture = null;
+    private AtomicLong pendingWrites = new AtomicLong(0);
 
     protected void initContext(ChannelHandlerContext ctx) {
         if (clientCtx == null) {
@@ -29,16 +33,27 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        if (ctx == clientCtx) {
+        if (ctx == serverCtx) {
+            Util.log("DataRelayHandler: removed (server)");
+            serverCtx = null;
+            if (pendingWrites.get() == 0) {
+                if (clientCtx != null)
+                    clientCtx.close();
+            } else {
+                lastClientWriteFuture.addListener(
+                        new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture f) {
+                                Util.log("DataRelayHandler: last client write done");
+                                f.channel().close();
+                            }
+                        });
+            }
+        } else if (ctx == clientCtx) {
             Util.log("DataRelayHandler: removed (client)");
             clientCtx = null;
             if (serverCtx != null)
                 serverCtx.close();
-        } else if (ctx == serverCtx) {
-            Util.log("DataRelayHandler: removed (server)");
-            serverCtx = null;
-            if (clientCtx != null)
-                clientCtx.close();
         } else if (clientCtx != null && serverCtx != null) {
             throw new IllegalStateException("DataRelayHandler: unknown handler context removed");
         }
@@ -53,7 +68,16 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
             // or any protocol for that matter.
             serverCtx.writeAndFlush(msg);
         } else if (ctx == serverCtx) {
-            clientCtx.writeAndFlush(msg);
+            pendingWrites.incrementAndGet();
+            lastClientWriteFuture = clientCtx.writeAndFlush(msg);
+            lastClientWriteFuture.addListener(
+                    new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(ChannelFuture f) {
+                            pendingWrites.decrementAndGet();
+                        }
+                    });
+
         } else if (clientCtx != null && serverCtx != null) {
             throw new IllegalStateException("DataRelayHandler: unknown context from read");
         }
