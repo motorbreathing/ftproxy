@@ -12,6 +12,7 @@ public class FTPAuthResponse extends FTPTrivialResponse {
         // Enable SSL - towards server
         handler.enableServerSSL();
 
+        handler.controlSSLEnabled(true);
         handler.controlSSLRequested(false);
 
         // Pass the affirmative nod down to the client

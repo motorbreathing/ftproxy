@@ -5,6 +5,7 @@ import four.six.ftproxy.util.Util;
 public class FTPAuthCommand extends FTPTrivialCommand {
     public static final String COMMAND_STR = "AUTH";
     public static final String RESPONSE_STR = "234 Proceed with negotiation\r\n";
+    public static final String RESPONSE_534_STR = "534 Authentication already set to TLS\r\n";
 
     public FTPAuthCommand(String args[], FTPRelayHandler handler) {
         super(args, handler);
@@ -13,9 +14,14 @@ public class FTPAuthCommand extends FTPTrivialCommand {
     @Override
     public String execute() {
         if (args[1].equalsIgnoreCase("SSL") || args[1].equalsIgnoreCase("TLS")) {
+            if (handler.clientSSLEnabled()) {
+                handler.writeToClient(RESPONSE_534_STR);
+                return null;
+            }
+
             // Forward original "AUTH SSL/TLS" command to server - only if SSL
             // termination is disabled
-            if (!Util.getSSLTermination()) {
+            if (!Util.getSSLTermination() && !handler.serverSSLEnabled()) {
                 handler.controlSSLRequested(true);
                 return super.execute();
             }

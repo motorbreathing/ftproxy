@@ -36,6 +36,7 @@ public class Util {
     public static final String DEFAULT_SERVER_BACKLOG_STR = "128";
     public static final String DEFAULT_READ_TIMEOUT_STR = "30";
     public static final String DEFAULT_TERMINATE_SSL_STR = "false";
+    public static final String DEFAULT_IMPLICIT_SSL_STR = "false";
 
     public static final String THIS_HOST_KEY = "host";
     public static final String THIS_PORT_KEY = "port";
@@ -44,6 +45,7 @@ public class Util {
     public static final String SERVER_BACKLOG_KEY = "server-backlog";
     public static final String READ_TIMEOUT_KEY = "read-timeout";
     public static final String TERMINATE_SSL_KEY = "terminate-ssl";
+    public static final String IMPLICIT_SSL_KEY = "implicit-ssl";
 
     public static final String LOOPBACK_IPV6 = "::1";
     public static final String LOCAL_HOST = "localhost";
@@ -60,6 +62,8 @@ public class Util {
             Integer.parseInt(System.getProperty(READ_TIMEOUT_KEY, DEFAULT_READ_TIMEOUT_STR));
     public static final boolean TERMINATE_SSL =
             Boolean.parseBoolean(System.getProperty(TERMINATE_SSL_KEY, DEFAULT_TERMINATE_SSL_STR));
+    public static final boolean IMPLICIT_SSL =
+            Boolean.parseBoolean(System.getProperty(IMPLICIT_SSL_KEY, DEFAULT_IMPLICIT_SSL_STR));
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -80,6 +84,7 @@ public class Util {
         defaultProperties.setProperty(SERVER_BACKLOG_KEY, Integer.toString(SERVER_BACKLOG));
         defaultProperties.setProperty(READ_TIMEOUT_KEY, Integer.toString(READ_TIMEOUT_SECONDS));
         defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
+        defaultProperties.setProperty(IMPLICIT_SSL_KEY, Boolean.toString(IMPLICIT_SSL));
         configProperties = new Properties(defaultProperties);
         loadConfigFromFile(CONFIG_FILENAME);
     }
@@ -116,6 +121,16 @@ public class Util {
     public static void setSSLTermination(boolean f)
     {
         setConfigProperty(TERMINATE_SSL_KEY, Boolean.toString(f));
+    }
+
+    public static boolean getImplicitSSL()
+    {
+        return Boolean.parseBoolean(configProperties.getProperty(IMPLICIT_SSL_KEY));
+    }
+
+    public static void setImplicitSSL(boolean f)
+    {
+        setConfigProperty(IMPLICIT_SSL_KEY, Boolean.toString(f));
     }
 
     private static void setConfigProperty(String key, String value) {

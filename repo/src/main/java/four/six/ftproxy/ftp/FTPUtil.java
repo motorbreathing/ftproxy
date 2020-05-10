@@ -7,13 +7,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import four.six.ftproxy.util.Util;
+
 public class FTPUtil {
     public static final String UNRECOGNIZED_COMMAND_STR =
             "500 Syntax error - command unrecognized\r\n";
     public static final String UNIMPLEMENTED_COMMAND_STR = "502 error - command unimplemented\r\n";
 
     public static ChannelFuture getFTProxyServerChannel() throws Exception {
-        return getFTProxyServerChannel(false);
+        return getFTProxyServerChannel(Util.getImplicitSSL());
     }
 
     public static ChannelFuture getFTProxyServerChannel(boolean sslStatus) throws Exception {
