@@ -1,0 +1,12 @@
+# Example ftproxy settings
+
+host=127.0.0.1
+port=8181
+implicit-ssl=false
+read-timeout=120
+remote-host=localhost
+remote-port=14646
+server-backlog=512
+terminate-ssl=true
+
+

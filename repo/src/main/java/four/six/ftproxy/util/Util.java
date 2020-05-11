@@ -37,6 +37,7 @@ public class Util {
     public static final String DEFAULT_READ_TIMEOUT_STR = "30";
     public static final String DEFAULT_TERMINATE_SSL_STR = "false";
     public static final String DEFAULT_IMPLICIT_SSL_STR = "false";
+    public static final String DEFAULT_PROPERTIES_PATH_STR = CONFIG_FILENAME;
 
     public static final String THIS_HOST_KEY = "host";
     public static final String THIS_PORT_KEY = "port";
@@ -46,6 +47,7 @@ public class Util {
     public static final String READ_TIMEOUT_KEY = "read-timeout";
     public static final String TERMINATE_SSL_KEY = "terminate-ssl";
     public static final String IMPLICIT_SSL_KEY = "implicit-ssl";
+    public static final String PROPERTIES_PATH_KEY = "path-to-properties";
 
     public static final String LOOPBACK_IPV6 = "::1";
     public static final String LOCAL_HOST = "localhost";
@@ -64,6 +66,8 @@ public class Util {
             Boolean.parseBoolean(System.getProperty(TERMINATE_SSL_KEY, DEFAULT_TERMINATE_SSL_STR));
     public static final boolean IMPLICIT_SSL =
             Boolean.parseBoolean(System.getProperty(IMPLICIT_SSL_KEY, DEFAULT_IMPLICIT_SSL_STR));
+    public static final String PROPERTIES_PATH =
+            System.getProperty(PROPERTIES_PATH_KEY, DEFAULT_PROPERTIES_PATH_STR);
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -84,9 +88,10 @@ public class Util {
         defaultProperties.setProperty(SERVER_BACKLOG_KEY, Integer.toString(SERVER_BACKLOG));
         defaultProperties.setProperty(READ_TIMEOUT_KEY, Integer.toString(READ_TIMEOUT_SECONDS));
         defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
-        defaultProperties.setProperty(IMPLICIT_SSL_KEY, Boolean.toString(IMPLICIT_SSL));
+        defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
+        defaultProperties.setProperty(PROPERTIES_PATH_KEY, PROPERTIES_PATH);
         configProperties = new Properties(defaultProperties);
-        loadConfigFromFile(CONFIG_FILENAME);
+        loadConfigFromFile(PROPERTIES_PATH);
     }
 
     private static void setupLogging() {
@@ -95,6 +100,22 @@ public class Util {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINE);
         logger.addHandler(handler);
+    }
+
+    public static String getServerHost() {
+        return configProperties.getProperty(THIS_HOST_KEY);
+    }
+
+    public static void setServerHost(String serverHost) {
+        setConfigProperty(THIS_HOST_KEY, serverHost);
+    }
+
+    public static int getServerPort() {
+        return Integer.parseInt(configProperties.getProperty(THIS_PORT_KEY));
+    }
+
+    public static void setServerPort(int serverPort) {
+        setConfigProperty(THIS_PORT_KEY, Integer.toString(serverPort));
     }
 
     public static String getRemoteHost() {
@@ -111,6 +132,14 @@ public class Util {
 
     public static void setRemotePort(int port) {
         setConfigProperty(REMOTE_PORT_KEY, Integer.toString(port));
+    }
+
+    public static int getServerBacklog() {
+        return Integer.parseInt(configProperties.getProperty(SERVER_BACKLOG_KEY));
+    }
+
+    public static void setServerBacklog(int serverBacklog) {
+        setConfigProperty(SERVER_BACKLOG_KEY, Integer.toString(serverBacklog));
     }
 
     public static boolean getSSLTermination()

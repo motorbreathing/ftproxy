@@ -57,7 +57,7 @@ public class NettyUtil {
 
     public static ChannelFuture getServerChannel(ChannelInitializer<? extends Channel> ci)
             throws Exception {
-        return getServerChannel(Util.THIS_PORT, ci);
+        return getServerChannel(Util.getServerHost(), Util.getServerPort(), ci);
     }
 
     public static ChannelFuture getServerChannel(int port, ChannelInitializer<? extends Channel> ci)
@@ -65,7 +65,7 @@ public class NettyUtil {
         ServerBootstrap b = getServerBootstrap();
         if (ci != null)
             b.childHandler(ci);
-        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.option(ChannelOption.SO_BACKLOG, Util.getServerBacklog());
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         return b.bind(port);
     }
@@ -75,7 +75,7 @@ public class NettyUtil {
         ServerBootstrap b = getServerBootstrap();
         if (ci != null)
             b.childHandler(ci);
-        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.option(ChannelOption.SO_BACKLOG, Util.getServerBacklog());
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         return b.bind(host, port);
     }
@@ -85,7 +85,7 @@ public class NettyUtil {
         ServerBootstrap b = getServerBootstrap();
         if (ci != null)
             b.childHandler(ci);
-        b.option(ChannelOption.SO_BACKLOG, Util.SERVER_BACKLOG);
+        b.option(ChannelOption.SO_BACKLOG, Util.getServerBacklog());
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
         for (int p = Util.dataPortMin; p <= Util.dataPortMax; p++) {
             try {
