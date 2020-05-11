@@ -57,12 +57,12 @@ mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhos
    if one is present in the working directory of the FTP proxy program. Example
    format follows:
 
-   host=localhost
-   port=8181
-   implicit-ssl=true
-   read-timeout=120
-   remote-host=someftphost
-   remote-port=9192
+   host=localhost<br />
+   port=8181<br />
+   implicit-ssl=true<br />
+   read-timeout=120<br />
+   remote-host=someftphost<br />
+   remote-port=9192<br />
 
 10. The -Dpath-to-properties=fullfilepath overrides the default
     location (i.e. the current working directory) of the properties file. As
