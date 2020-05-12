@@ -325,6 +325,21 @@ public class ServerTests {
         c.disconnect();
     }
 
+    public void testProxyFTPServer534() throws Exception {
+        int ftpServerPort = startFTPServer(false);
+        Util.setRemoteHost(Util.THIS_HOST);
+        Util.setRemotePort(ftpServerPort);
+        int proxyServerPort = startProxyServer(true);
+        TestClient c = new TestClient();
+        c.connect(Util.THIS_HOST, proxyServerPort, true);
+        c.requestExplicitSSL();
+        String resp = c.readLine(readTimeoutMillis);
+        assertTrue(resp.equals(TestUtil.withoutCRLF(FTPAuthCommand.RESPONSE_534_STR)));
+        stopProxyServer();
+        stopFTPServer();
+        c.disconnect();
+    }
+
     public void testProxyServer() throws Exception {
         testProxyServerSSL(true, true, true);
         testProxyServerSSL(false, false, true);
@@ -335,6 +350,8 @@ public class ServerTests {
     public void testProxyFTPServer() throws Exception {
         testProxyFTPServerSSLTermination();
         testProxyFTPServerDataVariations();
+        // Request TLS on an already-secure command channel
+        testProxyFTPServer534();
     }
 
     public void testProxyFTPServerDataVariations() throws Exception {
