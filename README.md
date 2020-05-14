@@ -1,5 +1,5 @@
 # ftproxy
-Java-Netty asynchronous FTP proxy
+Java-Netty asynchronous FTP proxy - thoughts and updates in chronological order
 
 1. Work in Progress.
 
