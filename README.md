@@ -46,11 +46,12 @@ mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhos
                                 // should be terminated at the FTP proxy or not
    - implicit-ssl false         // Default flag for whether SSL should be
                                 // enabled implicitly at the FTP proxy or not
+   - log-level INFO             // Default level of logging
 
    All of these can be independently modified using the -D switch for the java
    commandline. As an example:
 
-mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhost -Dport=8081 -Dremote-host=ftphost -Dremote-port=9091
+mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhost -Dport=8081 -Dremote-host=ftphost -Dremote-port=9091 -Dlog-level=FINEST
 
 9. The mentioned default values, as well as any overriding command line parameters,
    will in turn be overridden by the contents of a properties file (ftproxy.properties),
@@ -63,6 +64,7 @@ mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhos
    read-timeout=120<br />
    remote-host=someftphost<br />
    remote-port=9192<br />
+   log-level=FINE<br />
 
 10. The -Dpath-to-properties=fullfilepath overrides the default
     location (i.e. the current working directory) of the properties file. As
@@ -70,4 +72,6 @@ mvn exec:java -Dexec.mainClass="four.six.ftproxy.server.FTProxy" -Dhost=localhos
 
 mvn exec:java -Dpath-to-properties=D:\\cygwin64\\tmp\\ftproxy.properties -Dexec.mainClass="four.six.ftproxy.server.FTProxy"
 
+11. The logging framework has been updated (with configurable levels) and some
+    of the preceding config snippets updated accordingly
 
