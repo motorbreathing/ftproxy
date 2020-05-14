@@ -38,6 +38,7 @@ public class Util {
     public static final String DEFAULT_TERMINATE_SSL_STR = "false";
     public static final String DEFAULT_IMPLICIT_SSL_STR = "false";
     public static final String DEFAULT_PROPERTIES_PATH_STR = CONFIG_FILENAME;
+    public static final String DEFAULT_LOGLEVEL_STR = "info";
 
     public static final String THIS_HOST_KEY = "host";
     public static final String THIS_PORT_KEY = "port";
@@ -48,6 +49,7 @@ public class Util {
     public static final String TERMINATE_SSL_KEY = "terminate-ssl";
     public static final String IMPLICIT_SSL_KEY = "implicit-ssl";
     public static final String PROPERTIES_PATH_KEY = "path-to-properties";
+    public static final String LOGLEVEL_KEY = "log-level";
 
     public static final String LOOPBACK_IPV6 = "::1";
     public static final String LOCAL_HOST = "localhost";
@@ -68,6 +70,8 @@ public class Util {
             Boolean.parseBoolean(System.getProperty(IMPLICIT_SSL_KEY, DEFAULT_IMPLICIT_SSL_STR));
     public static final String PROPERTIES_PATH =
             System.getProperty(PROPERTIES_PATH_KEY, DEFAULT_PROPERTIES_PATH_STR);
+    public static final String LOGLEVEL =
+            System.getProperty(LOGLEVEL_KEY, DEFAULT_LOGLEVEL_STR);
 
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -78,8 +82,6 @@ public class Util {
     public static final int IPV6_ADDRESS_LENGTH = 16;
 
     static {
-        setupLogging();
-
         defaultProperties = new Properties();
         defaultProperties.setProperty(THIS_HOST_KEY, THIS_HOST);
         defaultProperties.setProperty(THIS_PORT_KEY, Integer.toString(THIS_PORT));
@@ -90,15 +92,17 @@ public class Util {
         defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
         defaultProperties.setProperty(TERMINATE_SSL_KEY, Boolean.toString(TERMINATE_SSL));
         defaultProperties.setProperty(PROPERTIES_PATH_KEY, PROPERTIES_PATH);
+        defaultProperties.setProperty(LOGLEVEL_KEY, LOGLEVEL);
         configProperties = new Properties(defaultProperties);
         loadConfigFromFile(PROPERTIES_PATH);
+        setupLogging(getLoglevel());
     }
 
-    private static void setupLogging() {
-        logger.setLevel(Level.FINE);
+    private static void setupLogging(Level level) {
+        logger.setLevel(level);
         logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINE);
+        handler.setLevel(level);
         logger.addHandler(handler);
     }
 
@@ -162,6 +166,16 @@ public class Util {
         setConfigProperty(IMPLICIT_SSL_KEY, Boolean.toString(f));
     }
 
+    public static Level getLoglevel()
+    {
+        try {
+            return Level.parse(configProperties.getProperty(LOGLEVEL_KEY));
+        } catch (Exception e) {
+            System.err.println("unknown log level");
+            return Level.INFO;
+        }
+    }
+
     private static void setConfigProperty(String key, String value) {
         configProperties.setProperty(key, value);
     }
@@ -169,7 +183,7 @@ public class Util {
     public static boolean loadConfigFromFile(String filename) {
         File f = new File(filename);
         if (!f.exists() || !f.canRead()) {
-            Util.log("Unable to access config file: " + filename);
+            System.err.println("Unable to access config file: " + filename);
             return false;
         }
 
@@ -184,5 +198,37 @@ public class Util {
 
     public static void log(String msg) {
         logger.fine(msg);
+    }
+
+    public static void log(Level level, String msg) {
+        logger.log(level, msg);
+    }
+
+    public static void logSevere(String msg) {
+        logger.log(Level.SEVERE, msg);
+    }
+
+    public static void logWarning(String msg) {
+        logger.log(Level.WARNING, msg);
+    }
+
+    public static void logInfo(String msg) {
+        logger.log(Level.INFO, msg);
+    }
+
+    public static void logConfig(String msg) {
+        logger.log(Level.CONFIG, msg);
+    }
+
+    public static void logFine(String msg) {
+        logger.log(Level.FINE, msg);
+    }
+
+    public static void logFiner(String msg) {
+        logger.log(Level.FINER, msg);
+    }
+
+    public static void logFinest(String msg) {
+        logger.log(Level.FINEST, msg);
     }
 }
