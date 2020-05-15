@@ -38,7 +38,7 @@ public class Util {
     public static final String DEFAULT_TERMINATE_SSL_STR = "false";
     public static final String DEFAULT_IMPLICIT_SSL_STR = "false";
     public static final String DEFAULT_PROPERTIES_PATH_STR = CONFIG_FILENAME;
-    public static final String DEFAULT_LOGLEVEL_STR = "info";
+    public static final String DEFAULT_LOGLEVEL_STR = "INFO";
 
     public static final String THIS_HOST_KEY = "host";
     public static final String THIS_PORT_KEY = "port";
@@ -168,10 +168,11 @@ public class Util {
 
     public static Level getLoglevel()
     {
+        String loglevel = configProperties.getProperty(LOGLEVEL_KEY);
         try {
-            return Level.parse(configProperties.getProperty(LOGLEVEL_KEY));
+            return Level.parse(loglevel);
         } catch (Exception e) {
-            System.err.println("unknown log level");
+            System.err.println("unknown log level: " + loglevel);
             return Level.INFO;
         }
     }

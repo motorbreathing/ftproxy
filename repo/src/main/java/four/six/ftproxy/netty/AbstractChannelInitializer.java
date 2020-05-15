@@ -52,7 +52,7 @@ abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChann
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Util.log("ChannelInitializer: caught exception");
+        Util.logWarning("AbstractChannelInitializer: caught exception");
         cause.printStackTrace();
         ctx.close();
     }

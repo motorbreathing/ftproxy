@@ -18,7 +18,8 @@ public class FTPDataRelayResponse extends FTPTrivialResponse {
             return FTPPasvResponse.formatResponse(ipaddr, port);
         else if (ipaddr.length == Util.IPV6_ADDRESS_LENGTH)
             return FTPEpsvResponse.formatResponse(ipaddr, port);
-        else Util.log("FTP Relay response: bad address (length = " + ipaddr.length + ")");
+        else
+            Util.logWarning("FTP Relay response: bad address (length = " + ipaddr.length + ")");
         return null;
     }
 }

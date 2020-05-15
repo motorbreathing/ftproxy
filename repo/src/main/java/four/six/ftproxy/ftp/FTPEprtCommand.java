@@ -9,25 +9,24 @@ public class FTPEprtCommand extends FTPDataRelayCommand {
 
     public FTPEprtCommand(String args[], FTPRelayHandler handler) {
         super(args, handler);
-        Util.log("FTP EPRT command");
     }
 
     public static String formatCommand(byte[] addr, int port) {
-        Util.log("FTP EPRT command: format: port is " + port);
+        Util.logFinest("FTP EPRT command: format: port is " + port);
         String c = COMMAND_STR;
         c += Util.SPACE;
         c += FTPUtil.formatPipeDelimitedSocketAddress(addr, port);
-        Util.log("FTP EPRT command: formatted: " + c);
+        Util.logFine("FTP EPRT command: formatted: " + c);
         return c + Util.CRLF;
     }
 
     protected InetSocketAddress processEprtArgs() {
         String c = String.join(Util.SPACE, args);
-        Util.log("About to process FTP EEPRT Command: " + c);
+        Util.logFine("About to process FTP EPRT Command: " + c);
         c = c.substring(c.indexOf(Util.SPACE) + 1);
         InetSocketAddress address = FTPUtil.processPipeDelimitedSocketAddress(c);
         if (address == null) {
-            Util.log("Bad address in EPRT (" + String.join(Util.SPACE, args) + ")");
+            Util.logWarning("Bad address in EPRT (" + String.join(Util.SPACE, args) + ")");
             return null;
         }
         return address;

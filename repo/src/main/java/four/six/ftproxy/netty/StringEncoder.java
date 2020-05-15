@@ -36,6 +36,6 @@ public class StringEncoder extends MessageToMessageEncoder<CharSequence> {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        Util.log("StringEncoder: removed");
+        Util.logFinest("StringEncoder: removed");
     }
 }

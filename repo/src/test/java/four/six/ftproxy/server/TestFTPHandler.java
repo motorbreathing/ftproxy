@@ -32,6 +32,7 @@ public class TestFTPHandler extends TestSimpleHandler {
     public static final String PROT_RESPONSE_200_P_STR = "200 Protection level set to P\r\n";
     public static final String JACKAL_STR = "The Day Of The Jackal";
     private static final Charset charset = Charset.forName(Util.UTF8_STR);
+    TestFTPServer server;
 
     private ChannelHandlerContext ctx;
     boolean sslAllowed = true;
@@ -45,13 +46,16 @@ public class TestFTPHandler extends TestSimpleHandler {
         return new ChannelInboundHandlerAdapter() {
             @Override
             public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                Util.log("TestFTPServer: data channel connected");
+                Util.logFine("TestFTPServer: data channel connected");
                 ByteBuf response = Unpooled.copiedBuffer(JACKAL_STR, charset);
                 ChannelFuture cf = ctx.writeAndFlush(response);
                 cf.addListener(
                         new ChannelFutureListener() {
                             @Override
                             public void operationComplete(ChannelFuture f) {
+                                Channel parent = f.channel().parent();
+                                if (parent != null)
+                                    parent.close();
                                 f.channel().close();
                             }
                         });
@@ -64,9 +68,9 @@ public class TestFTPHandler extends TestSimpleHandler {
                 new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        Util.log("File send: initializing channel");
+                        Util.logFinest("File send: initializing channel");
                         if (dataSSLEnabled) {
-                            Util.log("File send: enabling SSL");
+                            Util.logFine("File send: enabling SSL");
                             ch.pipeline().addFirst(SSLHandlerProvider.getServerSSLHandler(ch));
                         }
                         ChannelHandler handler = getFileSendChannelHandler();

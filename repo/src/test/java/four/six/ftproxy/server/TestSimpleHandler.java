@@ -11,18 +11,20 @@ public class TestSimpleHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Util.log("TestSimpleHandler: channel active");
+        Util.logFine("TestSimpleHandler: channel active");
         this.ctx = ctx;
     }
 
     protected void process(ChannelHandlerContext ctx, String incoming) {
-        if (incoming.equalsIgnoreCase("quit")) ctx.close();
-        else ctx.writeAndFlush(incoming);
+        if (incoming.equalsIgnoreCase("quit"))
+            ctx.close();
+        else
+            ctx.writeAndFlush(incoming);
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception {
-        Util.log("TestSimpleHandler: read: " + incoming);
+        Util.logFine("TestSimpleHandler: read: " + incoming);
         process(ctx, incoming);
     }
 

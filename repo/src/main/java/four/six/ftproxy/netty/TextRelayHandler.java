@@ -38,7 +38,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     }
 
     private void initiateServerConnect() {
-        Util.log("Initiating server connect with SSL " + (serverSSL ? "enabled" : "disabled"));
+        Util.logFine("Initiating server connect with SSL " + (serverSSL ? "enabled" : "disabled"));
         TextRelayChannelInitializer selfPointer =
                 new TextRelayChannelInitializer() {
                     @Override
@@ -59,9 +59,9 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
                 new ChannelFutureListener() {
                     public void operationComplete(ChannelFuture f) {
                         if (f.isSuccess()) {
-                            Util.log("Server channel connected");
+                            Util.logFinest("Server channel connected");
                         } else {
-                            Util.log("Server channel failed to connect");
+                            Util.logWarning("Server channel failed to connect");
                             clientCtx.writeAndFlush("Server unavailable\r\n");
                             clientCtx.close();
                         }
@@ -73,7 +73,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void initializeClient(ChannelHandlerContext ctx) {
         clientCtx = ctx;
         InetSocketAddress addr = ((SocketChannel) ctx.channel()).localAddress();
-        Util.log("Active channel from client at: " + addr.toString());
+        Util.logFine("Active channel from client at: " + addr.toString());
         clientFacingAddress = addr.getAddress();
         initiateServerConnect();
     }
@@ -81,7 +81,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void initializeServer(ChannelHandlerContext ctx) {
         serverCtx = ctx;
         InetSocketAddress raddr = ((SocketChannel) ctx.channel()).remoteAddress();
-        Util.log("Active channel to remote server at: " + raddr.toString());
+        Util.logFine("Active channel to remote server at: " + raddr.toString());
         InetSocketAddress addr = ((SocketChannel) ctx.channel()).localAddress();
         serverFacingAddress = addr.getAddress();
         serverData = new LineProvider();
@@ -92,13 +92,13 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     // Process a new incoming client connection
     private void clientActive(ChannelHandlerContext ctx) throws Exception {
-        Util.log("Client channel active");
+        Util.logFine("Client channel active");
         initializeClient(ctx);
     }
 
     // Process a new backend/server connection
     private void serverActive(ChannelHandlerContext ctx) {
-        Util.log("Backend server channel active");
+        Util.logFine("Backend server channel active");
         initializeServer(ctx);
     }
 
@@ -112,7 +112,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        Util.log("TextRelayHandler: removed");
+        Util.logFinest("TextRelayHandler: removed");
         removePeerHandler(ctx);
     }
 
@@ -153,7 +153,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public void enableServerSSL() {
-        Util.log("Enabling Server-side SSL");
+        Util.logFine("Enabling Server-side SSL");
         serverSSL = true;
 
         if (serverCtx == null)
@@ -176,7 +176,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     public void clientRead(String incoming) throws Exception {
         clientData.add(incoming);
         if (serverCtx == null) {
-            Util.log("Can't find server side context; stashing read");
+            Util.logFine("Can't find server side context; stashing read");
             return;
         }
         flushToServer();
@@ -218,14 +218,14 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public void writeToServer(String line) {
-        Util.log("[wrote to server] " + line);
+        Util.logFinest("[wrote to server] " + line);
         serverCtx.writeAndFlush(line);
     }
 
     private void processCommandAndWrite(String line) {
         line = processCommand(line);
         if (line != null && line.length() > 0) {
-            Util.log("[processed command] " + line);
+            Util.logFinest("[processed command] " + line);
             writeToServer(line);
         }
     }
@@ -233,7 +233,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
     private void processResponseAndWrite(String line) {
         line = processResponse(line);
         if (line != null && line.length() > 0) {
-            Util.log("[processed line] " + line);
+            Util.logFinest("[processed line] " + line);
             writeToClient(line);
         }
     }
@@ -243,7 +243,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             String line = clientData.getLine();
             if (line == null)
                 break;
-            Util.log("[from client] " + line);
+            Util.logFinest("[from client] " + line);
             processCommandAndWrite(line);
         }
     }
@@ -253,7 +253,7 @@ public class TextRelayHandler extends SimpleChannelInboundHandler<String> {
             String line = serverData.getLine();
             if (line == null)
                 break;
-            Util.log("[from server] " + line);
+            Util.logFinest("[from server] " + line);
             processResponseAndWrite(line);
         }
     }

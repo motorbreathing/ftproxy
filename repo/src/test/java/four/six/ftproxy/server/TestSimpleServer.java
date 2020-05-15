@@ -41,7 +41,7 @@ public class TestSimpleServer extends AbstractTestServer {
 
     void enableExplicitSSL() {
         if (handler == null) {
-            Util.log("Warning: TextSimpleServer: handling missing, can't enable SSL");
+            Util.logWarning("TextSimpleServer: handling missing, can't enable SSL");
             return;
         }
         handler.enableExplicitSSL();

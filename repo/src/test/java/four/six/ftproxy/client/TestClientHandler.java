@@ -7,12 +7,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class TestClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Util.log("TestClientHandler: channelActive");
+        Util.logFine("TestClientHandler: channelActive");
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String incoming) throws Exception {
-        Util.log("TestClientHandler: channelRead: " + incoming);
+        Util.logFine("TestClientHandler: channelRead: " + incoming);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class TestClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Util.log("TestClientHandler: caught exception:\n +" + cause.toString());
+        Util.logWarning("TestClientHandler: caught exception:\n +" + cause.toString());
         ctx.close();
     }
 }

@@ -133,7 +133,7 @@ public class TestClient {
 
     public void connect(String host, int port, boolean ssl) throws Exception {
         try {
-            Util.log("Client: attempting to connect to " + host + " at port " + port);
+            Util.logInfo("Client: attempting to connect to " + host + " at port " + port);
             ch = NettyUtil.getChannelToHost(host, port, getChannelInitializer(ssl)).sync().channel();
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +162,7 @@ public class TestClient {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 String incoming = ((ByteBuf) msg).toString(Charset.forName("UTF-8"));
-                Util.log("getFileActiveV4 handler: " + incoming);
+                Util.logFine("getFileActiveV4 handler: " + incoming);
                 TestClient.this.addFileContent(incoming);
             }
 
@@ -178,10 +178,10 @@ public class TestClient {
                 new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        Util.log("File receive: initializing channel");
+                        Util.logFinest("File receive: initializing channel");
                         if (dataSSLEnabled) {
                             ch.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
-                            Util.log("File receive: enabling SSL");
+                            Util.logFine("File receive: enabling SSL");
                         }
                         ChannelHandler handler = TestClient.this.getFileReceiveHandler();
                         ch.pipeline().addLast(handler);
@@ -195,7 +195,7 @@ public class TestClient {
             throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
-            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V4 relay");
+            Util.logWarning("Invalid address (length = " + addr.getAddress().length + ") for Active V4 relay");
             throw new IllegalStateException();
         }
         write("PASV\r\n");
@@ -214,7 +214,7 @@ public class TestClient {
             throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
-            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
+            Util.logWarning("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
             throw new IllegalStateException();
         }
         write("EPSV\r\n");
@@ -222,7 +222,7 @@ public class TestClient {
         if (c == null)
             return null;
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
-        Util.log("EPSV response is: " + c);
+        Util.logFine("EPSV response is: " + c);
         resetFileContents();
         int port = FTPUtil.processPipeDelimitedV6SocketAddress(c);
         NettyUtil.getChannelToAddress(new InetSocketAddress(addr, port), getFileReceiveInitializer());
@@ -234,14 +234,16 @@ public class TestClient {
             throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV4_ADDRESS_LENGTH) {
-            Util.log("Invalid address (length = " + addr.getAddress().length + ")for Active V4 relay");
+            Util.logWarning("Invalid address (length = " + addr.getAddress().length + ")for Active V4 relay");
             throw new IllegalStateException();
         }
         ChannelFuture cf = NettyUtil.getListenerChannel(addr, getFileReceiveInitializer());
         InetSocketAddress localAddr = (InetSocketAddress) cf.channel().localAddress();
         resetFileContents();
         write(FTPDataRelayCommand.getRelayCommand(localAddr));
-        return readFile(readTimeoutMillis);
+        String res = readFile(readTimeoutMillis);
+        cf.channel().close();
+        return res;
     }
 
     public String getFileActiveV6() throws Exception {
@@ -249,14 +251,16 @@ public class TestClient {
             throw new IllegalStateException();
         InetAddress addr = ((SocketChannel) ch).localAddress().getAddress();
         if (addr.getAddress().length != Util.IPV6_ADDRESS_LENGTH) {
-            Util.log("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
+            Util.logWarning("Invalid address (length = " + addr.getAddress().length + ") for Active V6 relay");
             throw new IllegalStateException();
         }
         ChannelFuture cf = NettyUtil.getListenerChannel(addr, getFileReceiveInitializer());
         InetSocketAddress localAddr = (InetSocketAddress) cf.channel().localAddress();
         resetFileContents();
         write(FTPDataRelayCommand.getRelayCommand(localAddr));
-        return readFile(readTimeoutMillis);
+        String res = readFile(readTimeoutMillis);
+        cf.channel().close();
+        return res;
     }
 
     public void connect(String host, int port) throws Exception {
@@ -264,7 +268,7 @@ public class TestClient {
     }
 
     public void disconnect() throws Exception {
-        Util.log("Client: disconnecting");
+        Util.logFinest("Client: disconnecting");
         ch.close();
     }
 
@@ -280,6 +284,6 @@ public class TestClient {
         if (ch != null)
             ch.pipeline().addFirst(SSLHandlerProvider.getClientSSLHandler(ch));
         else
-            Util.log("Warning: enableSSL() failed for client");
+            Util.logWarning("enableSSL() failed for client");
     }
 }

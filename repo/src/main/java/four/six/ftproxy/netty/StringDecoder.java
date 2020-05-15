@@ -31,6 +31,6 @@ public class StringDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        Util.log("StringDecoder: removed");
+        Util.logFinest("StringDecoder: removed");
     }
 }

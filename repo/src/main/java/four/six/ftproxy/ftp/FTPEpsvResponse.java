@@ -12,7 +12,7 @@ public class FTPEpsvResponse extends FTPDataRelayResponse {
     }
 
     public static String formatResponse(byte[] addr, int port) {
-        Util.log("FTP EPSV response: format: port is " + port);
+        Util.logFinest("FTP EPSV response: format: port is " + port);
         return formatV6Response(port);
     }
 
@@ -28,13 +28,13 @@ public class FTPEpsvResponse extends FTPDataRelayResponse {
         r += Integer.toString(port);
         r += Util.PIPE;
         r += Util.RIGHT_PARA;
-        Util.log("FTP EPSV response: formatted: " + r);
+        Util.logFine("FTP EPSV response: formatted: " + r);
         return r + Util.CRLF;
     }
 
     protected int processEpsvArgs() {
         String c = String.join(Util.SPACE, args);
-        Util.log("About to process FTP EPSV response: " + c);
+        Util.logFine("About to process FTP EPSV response: " + c);
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
         return FTPUtil.processPipeDelimitedV6SocketAddress(c);
     }

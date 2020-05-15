@@ -13,11 +13,11 @@ public class FTPPasvResponse extends FTPDataRelayResponse {
     }
 
     public static String formatResponse(byte[] addr, int port) {
-        Util.log("FTP PASV response: format: port is " + port);
+        Util.logFinest("FTP PASV response: format: port is " + port);
         if (addr.length == Util.IPV4_ADDRESS_LENGTH) {
             return formatV4Response(addr, port);
         } else {
-            Util.log("Format FTP PASV response: invalid address (bad length: " + addr.length + ")");
+            Util.logWarning("Format FTP PASV response: invalid address (bad length: " + addr.length + ")");
             return null;
         }
     }
@@ -30,17 +30,17 @@ public class FTPPasvResponse extends FTPDataRelayResponse {
         r += Util.LEFT_PARA;
         r += FTPUtil.formatCommaDelimitedV4SocketAddress(addr, port);
         r += Util.RIGHT_PARA;
-        Util.log("FTP PASV response: formatted: " + r);
+        Util.logFine("FTP PASV response: formatted: " + r);
         return r + Util.CRLF;
     }
 
     protected InetSocketAddress processPasvArgs() {
         String c = String.join(Util.SPACE, args);
-        Util.log("About to process FTP PASV response: " + c);
+        Util.logFine("About to process FTP PASV response: " + c);
         c = c.substring(c.indexOf(Util.LEFT_PARA) + 1, c.indexOf(Util.RIGHT_PARA));
         InetSocketAddress address = FTPUtil.processCommaDelimitedV4SocketAddress(c);
         if (address == null) {
-            Util.log("Bad address in PASV (" + String.join(Util.SPACE, args) + ")");
+            Util.logWarning("Bad address in PASV (" + String.join(Util.SPACE, args) + ")");
             return null;
         }
         return address;

@@ -58,14 +58,14 @@ public class FTPUtil {
 
         try {
             int port = Integer.parseInt(c.substring(third + 1, fourth));
-            Util.log("processPipeDelimitedSocketAddress: port is " + port);
+            Util.logFinest("processPipeDelimitedSocketAddress: port is " + port);
             if (port == -1)
                 return null;
             InetAddress addr = InetAddress.getByName(c.substring(second + 1, third));
-            Util.log("processPipeDelimitedSocketAddress: addr is " + addr.toString());
+            Util.logFine("processPipeDelimitedSocketAddress: addr is " + addr.toString());
             return new InetSocketAddress(addr, port);
         } catch (Exception e) {
-            Util.log("Failed to parse address string: " + e.toString());
+            Util.logWarning("Failed to parse address string: " + e.toString());
             return null;
         }
     }
@@ -73,7 +73,7 @@ public class FTPUtil {
     // EPRT
     public static String formatPipeDelimitedSocketAddress(byte[] addr, int port) {
         if (addr.length != Util.IPV4_ADDRESS_LENGTH && addr.length != Util.IPV6_ADDRESS_LENGTH) {
-            Util.log("FTP format address: bad address (length = " + addr.length + ")");
+            Util.logWarning("FTP format address: bad address (length = " + addr.length + ")");
             return null;
         }
         String s = Util.EMPTYSTRING;

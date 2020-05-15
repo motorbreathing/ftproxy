@@ -2,6 +2,7 @@ package four.six.ftproxy.netty;
 
 import four.six.ftproxy.util.Util;
 import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,10 +20,10 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     protected void initContext(ChannelHandlerContext ctx) {
         if (clientCtx == null) {
-            Util.log("DataRelayHandler: channel active (client)");
+            Util.logFine("DataRelayHandler: channel active (client)");
             clientCtx = ctx;
         } else {
-            Util.log("DataRelayHandler: channel active (server)");
+            Util.logFine("DataRelayHandler: channel active (server)");
             serverCtx = ctx;
         }
     }
@@ -34,7 +35,7 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
         if (ctx == serverCtx) {
-            Util.log("DataRelayHandler: removed (server)");
+            Util.logFine("DataRelayHandler: removed (server)");
             serverCtx = null;
             if (pendingWrites.get() == 0) {
                 if (clientCtx != null)
@@ -44,13 +45,13 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
                         new ChannelFutureListener() {
                             @Override
                             public void operationComplete(ChannelFuture f) {
-                                Util.log("DataRelayHandler: last client write done");
+                                Util.logFinest("DataRelayHandler: last client write done");
                                 f.channel().close();
                             }
                         });
             }
         } else if (ctx == clientCtx) {
-            Util.log("DataRelayHandler: removed (client)");
+            Util.logFinest("DataRelayHandler: removed (client)");
             clientCtx = null;
             if (serverCtx != null)
                 serverCtx.close();
@@ -61,7 +62,7 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Util.log("DataRelayHandler: channelRead");
+        Util.logFinest("DataRelayHandler: channelRead");
         if (ctx == clientCtx) {
             // Unlikely scenario, but what do we know - we're just a simple
             // data relay handler and not prone to making assumptions about ftp
@@ -90,7 +91,7 @@ public class DataRelayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Util.log("DataRelayHandler: caught exception");
+        Util.logWarning("DataRelayHandler: caught exception");
         cause.printStackTrace();
         closeSession();
     }

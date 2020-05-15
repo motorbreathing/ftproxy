@@ -37,7 +37,7 @@ abstract class AbstractTestServer extends Thread {
 
     public void enableSSL() {
         if (running)
-            Util.log("Warning: server is already running; enableSSL() is no-op");
+            Util.logWarning("server is already running; enableSSL() is no-op");
 
         sslStatus = true;
     }
@@ -48,19 +48,19 @@ abstract class AbstractTestServer extends Thread {
 
     public void run() {
         try {
-            Util.log(myName + ": attempting to start at port " + port);
+            Util.logInfo(myName + ": attempting to start at port " + port);
             ch =
                     NettyUtil.getServerChannel(host, port, getTestServerChannelInitializer())
                             .sync()
                             .channel();
             running = true;
-            Util.log(myName + ": up and running at port " + port);
+            Util.logInfo(myName + ": up and running at port " + port);
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
-            Util.log(myName + " at port " + port + ": interrupted; shutting down");
+            Util.logInfo(myName + " at port " + port + ": interrupted; shutting down");
             ch.close();
         } catch (Exception e) {
-            Util.log(myName + ": failed to bind at port " + port);
+            Util.logWarning(myName + ": failed to bind at port " + port);
             e.printStackTrace();
         }
         running = false;

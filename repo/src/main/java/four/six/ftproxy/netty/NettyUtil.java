@@ -92,11 +92,11 @@ public class NettyUtil {
                 // XXX : should be async?
                 return b.bind(addr, p).sync();
             } catch (Exception e) {
-                Util.log("Listener bind: port " + p + " not available, retrying next");
+                Util.logInfo("Listener bind: port " + p + " not available, retrying next");
                 continue;
             }
         }
-        Util.log(
+        Util.logWarning(
                 "Listener: failed to bind (in range " + Util.dataPortMin + "-" + Util.dataPortMax + ")");
         return null;
     }

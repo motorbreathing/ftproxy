@@ -46,9 +46,9 @@ public class FTPRelayHandler extends TextRelayHandler {
     private ChannelInitializer<? extends Channel> getChannelInitializer(
             ChannelHandler handler, boolean sslEnabled, boolean client) {
         if (sslEnabled)
-            Util.log("Setting up data connection with SSL enabled");
+            Util.logInfo("Setting up data connection with SSL enabled");
         else
-            Util.log("Setting up data connection with SSL disabled");
+            Util.logInfo("Setting up data connection with SSL disabled");
 
         DataRelayChannelInitializer ci =
                 new DataRelayChannelInitializer() {
@@ -77,7 +77,7 @@ public class FTPRelayHandler extends TextRelayHandler {
         ChannelInitializer<? extends Channel> ci = getChannelInitializer(handler, dataSSLEnabled, true);
         ChannelFuture cf = NettyUtil.getListenerChannel(serverFacingAddress, ci);
         if (cf == null) {
-            Util.log("Active relay: failed to create listener");
+            Util.logWarning("Active relay: failed to create listener");
             return false;
         }
         InetSocketAddress localAddr = (InetSocketAddress) cf.channel().localAddress();
@@ -85,9 +85,9 @@ public class FTPRelayHandler extends TextRelayHandler {
         if (command != null) {
             aliveDataSessions.add(handler);
             writeToServer(command);
-            Util.log("Active relay: " + command);
+            Util.logFine("Active relay: " + command);
         } else {
-            Util.log("Active relay: failed to format command");
+            Util.logWarning("Active relay: failed to format command");
             return false;
         }
         return true;
@@ -100,18 +100,18 @@ public class FTPRelayHandler extends TextRelayHandler {
                 new ChannelFutureListener() {
                     public void operationComplete(ChannelFuture f) {
                         if (f.isSuccess()) {
-                            Util.log("Passive relay: server channel connected");
+                            Util.logFine("Passive relay: server channel connected");
                             f.channel()
                                     .closeFuture()
                                     .addListener(
                                             new ChannelFutureListener() {
                                                 public void operationComplete(ChannelFuture f) {
-                                                    Util.log("Passive relay: session done");
+                                                    Util.logFine("Passive relay: session done");
                                                     aliveDataSessions.remove(handler);
                                                 }
                                             });
                         } else {
-                            Util.log("Passive relay: server channel failed to connect");
+                            Util.logWarning("Passive relay: server channel failed to connect");
                             aliveDataSessions.remove(handler);
                             handler.closeSession();
                         }
@@ -122,7 +122,17 @@ public class FTPRelayHandler extends TextRelayHandler {
 
     // The provided argument is the address specified in a PORT/EPRT command
     public void startActiveRelay(InetSocketAddress addr) {
-        DataRelayHandler handler = new DataRelayHandler();
+        DataRelayHandler handler =
+                new DataRelayHandler() {
+                    @Override
+                    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                        boolean isServerChannel = clientCtx != null;
+                        initContext(ctx);
+                        if (isServerChannel) {
+                            ctx.channel().parent().close();
+                        }
+                    }
+                };
         ChannelInitializer<? extends Channel> ci =
                 getChannelInitializer(handler, dataSSLEnabled, false);
         ChannelFuture cf = NettyUtil.getChannelToAddress(addr, ci);
@@ -130,22 +140,22 @@ public class FTPRelayHandler extends TextRelayHandler {
                 new ChannelFutureListener() {
                     public void operationComplete(ChannelFuture f) {
                         if (f.isSuccess()) {
-                            Util.log("Active relay: client channel connected");
+                            Util.logFine("Active relay: client channel connected");
                             f.channel()
                                     .closeFuture()
                                     .addListener(
                                             new ChannelFutureListener() {
                                                 public void operationComplete(ChannelFuture f) {
-                                                    Util.log("Active relay: session done");
+                                                    Util.logFine("Active relay: session done");
                                                     aliveDataSessions.remove(handler);
                                                 }
                                             });
                             if (!finishActiveRelay(handler)) {
-                                Util.log("Active relay: failed to finish");
+                                Util.logWarning("Active relay: failed to finish");
                                 f.channel().close();
                             }
                         } else {
-                            Util.log("Active relay: client channel failed to connect");
+                            Util.logWarning("Active relay: client channel failed to connect");
                         }
                     }
                 };
@@ -160,25 +170,27 @@ public class FTPRelayHandler extends TextRelayHandler {
                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
                         boolean isClientChannel = clientCtx == null;
                         initContext(ctx);
-                        if (isClientChannel)
+                        if (isClientChannel) {
                             finishPassiveRelay(this, addr);
+                            ctx.channel().parent().close();
+                        }
                     }
                 };
         ChannelInitializer<? extends Channel> ci =
                 getChannelInitializer(handler, dataSSLEnabled, false);
         ChannelFuture cf = NettyUtil.getListenerChannel(clientFacingAddress, ci);
         if (cf == null) {
-            Util.log("Passive relay: failed to create listener");
+            Util.logWarning("Passive relay: failed to create listener");
             return;
         }
         InetSocketAddress localAddr = (InetSocketAddress) cf.channel().localAddress();
         String response = FTPDataRelayResponse.getRelayResponse(localAddr);
         if (response != null) {
             aliveDataSessions.add(handler);
-            Util.log("Passive relay: " + response);
+            Util.logFine("Passive relay: " + response);
             writeToClient(response);
         } else {
-            Util.log("Passive relay: failed to format response");
+            Util.logWarning("Passive relay: failed to format response");
             cf.channel().close();
             return;
         }
@@ -189,12 +201,12 @@ public class FTPRelayHandler extends TextRelayHandler {
         if (port > 0)
             startPassiveRelay(new InetSocketAddress(serverFacingAddress, port));
         else
-            Util.log("Passive relay: invalid port specified by remote server");
+            Util.logWarning("Passive relay: invalid port specified by remote server");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        Util.log("FTPRelayHandler: removed");
+        Util.logFinest("FTPRelayHandler: removed");
         for (DataRelayHandler handler : aliveDataSessions)
             handler.closeSession();
         aliveDataSessions.clear();
@@ -204,9 +216,9 @@ public class FTPRelayHandler extends TextRelayHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (cause instanceof ReadTimeoutException) {
-            Util.log("Text relay handler: read timed out");
+            Util.logWarning("Text relay handler: read timed out");
             if (aliveDataSessions.size() > 0) {
-                Util.log("Ignoring read timeout expiry due to active data sessions");
+                Util.logInfo("Ignoring read timeout expiry due to active data sessions");
                 return;
             }
         }
