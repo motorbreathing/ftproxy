@@ -53,9 +53,8 @@ public class TestFTPHandler extends TestSimpleHandler {
                         new ChannelFutureListener() {
                             @Override
                             public void operationComplete(ChannelFuture f) {
-                                Channel parent = f.channel().parent();
-                                if (parent != null)
-                                    parent.close();
+                                if (f.channel().parent() != null)
+                                    f.channel().parent().close();
                                 f.channel().close();
                             }
                         });
