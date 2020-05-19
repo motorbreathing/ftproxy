@@ -10,7 +10,7 @@ public class FTPResponseFactory {
         if (args[0].equals(FTPOkResponse.RESPONSE_200_STR))
             return new FTPOkResponse(args, handler);
 
-        // The server nodded agreement to something
+        // The server balked
         if (args[0].equals(FTPNotImplementedResponse.RESPONSE_502_STR))
             return new FTPNotImplementedResponse(args, handler);
 
