@@ -9,7 +9,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
-// Test comment
+// Test comment; update to branch2
 
 abstract class AbstractChannelInitializer extends ChannelInitializer<SocketChannel> {
     // Child classes can provide all these, if so inclined
